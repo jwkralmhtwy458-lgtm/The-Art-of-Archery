@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر فن الرماية</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: #f4f6f9; color: #333; }
+        header { background: #1b2a47; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 22px; font-weight: bold; color: #e67e22; }
+        .btn-dev { background: #e67e22; color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; }
+        .banner { background: #2c3e50; color: white; text-align: center; padding: 30px 20px; }
+        
+        .login-box { display: none; background: #fff; border: 2px solid #e67e22; padding: 15px; margin: 15px auto; max-width: 400px; text-align: center; border-radius: 8px; }
+        .login-box input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; width: 60%; }
+        .login-box button { padding: 8px 15px; background: #e67e22; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+        .admin-panel { display: none; background: #fff; border: 2px solid #27ae60; padding: 20px; margin: 20px auto; max-width: 1000px; border-radius: 8px; }
+        .admin-panel input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        .admin-panel button { padding: 8px 15px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; display: flex; gap: 20px; flex-wrap: wrap; }
+        .products { flex: 2; min-width: 300px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .card { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 140px; object-fit: cover; border-radius: 5px; }
+        .price { color: #27ae60; font-weight: bold; margin: 8px 0; }
+        .btn-add { background: #1b2a47; color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; }
+        
+        .sidebar { flex: 1; min-width: 280px; }
+        .cart-box, .checkout-box, .contact-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        
+        .form-control { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid #ccc; border-radius: 4px; }
+        .bank-info { background: #eaf2f8; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 13px; border-right: 3px solid #3498db; }
+        
+        /* زر الإرسال مع المظهر المعطل */
+        .btn-send { background: #27ae60; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 15px; transition: 0.3s; }
+        .btn-send:disabled { background: #cccccc; cursor: not-allowed; opacity: 0.6; }
+
+        .btn-inquiry { background: #2980b9; color: white; text-decoration: none; display: block; text-align: center; padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">متجر فن الرماية</div>
+        <button id="devBtn" class="btn-dev" onclick="toggleDevMode()">وضع المطور</button>
+    </header>
+
+    <div class="banner">
+        <h2>مرحباً بك في متجر فن الرماية</h2>
+        <p>تصفح المنتجات وأكمل طلبك بسهولة</p>
+    </div>
+
+    <div class="login-box" id="loginBox">
+        <h4>تسجيل دخول المطور</h4>
+        <input type="password" id="passInput" placeholder="أدخل كلمة المرور">
+        <button id="checkPassBtn" onclick="loginDev()">دخول</button>
+    </div>
+
+    <div class="admin-panel" id="adminPanel">
+        <h3>لوحة المطور</h3>
+        <input type="text" id="pName" placeholder="اسم المنتج">
+        <input type="number" id="pPrice" placeholder="السعر">
+        <input type="text" id="pImg" placeholder="رابط الصورة">
+        <button id="addBtn">إضافة المنتج</button>
+    </div>
+
+    <div class="container">
+        <div class="products">
+            <h2>المنتجات</h2><br>
+            <div class="grid" id="productsGrid"></div>
+        </div>
+
+        <div class="sidebar">
+            <div class="cart-box">
+                <h3>السلة</h3><br>
+                <div id="cartItems"><p>السلة فارغة</p></div>
+                <hr style="margin: 10px 0;">
+                <strong>الإجمالي: <span id="totalPrice">0</span> ر.س</strong>
+            </div>
+
+            <div class="checkout-box">
+                <h3>إتمام الطلب والدفع</h3>
+                
+                <input type="text" id="custName" class="form-control" placeholder="الاسم الكامل" oninput="validateForm()">
+                <input type="tel" id="custPhone" class="form-control" placeholder="رقم الجوال (05xxxxxxxx)" maxlength="10" oninput="validateForm()">
+                <input type="text" id="custCity" class="form-control" placeholder="المدينة / الحي" oninput="validateForm()">
+                <input type="url" id="custMap" class="form-control" placeholder="رابط الموقع (Google Maps)" oninput="validateForm()">
+
+                <div class="bank-info">
+                    <strong>طريقة الدفع: تحويل بنكي</strong><br><br>
+                    <strong>تفاصيل الحساب البنكي:</strong><br>
+                    البنك: الأهلي / الراجحي<br>
+                    الآيبان (IBAN):<br>
+                    <code style="background: #fff; padding: 2px 4px; border-radius: 3px;">SA0000000000000000000000</code><br>
+                    <small style="color: #555;">* يرجى التحويل وإرفاق إيصال التحويل عند إرسال الطلب.</small>
+                </div>
+
+                <button class="btn-send" id="sendBtn" onclick="sendOrder()" disabled>تأكيد وإرسال الطلب</button>
+            </div>
+
+            <div class="contact-box">
+                <h3>للاستفسارات</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 8px;">لديك سؤال قبل الشراء؟ تواصل معنا مباشرة:</p>
+                <a href="https://wa.me/966546346251?text=مرحباً،%20لدي%20استفسار" target="_blank" class="btn-inquiry">تواصل مع الدعم الفني</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defaultProducts = [
+            { id: 1, name: "هدف رماية", price: 120, image: "https://via.placeholder.com/200" },
+            { id: 2, name: "حقيبة معدات", price: 250, image: "https://via.placeholder.com/200" }
+        ];
+
+        let products = JSON.parse(localStorage.getItem('my_saved_products')) || defaultProducts;
+        let cart = [];
+        let isAdmin = false;
+
+        function saveToStorage() {
+            localStorage.setItem('my_saved_products', JSON.stringify(products));
+        }
+
+        function toggleDevMode() {
+            let loginBox = document.getElementById('loginBox');
+            if(isAdmin) {
+                isAdmin = false;
+                document.getElementById('adminPanel').style.display = 'none';
+                loginBox.style.display = 'none';
+                render();
+            } else {
+                loginBox.style.display = (loginBox.style.display === 'block') ? 'none' : 'block';
+            }
+        }
+
+        function loginDev() {
+            let pass = document.getElementById('passInput').value;
+            if (pass === "MS1212") {
+                isAdmin = true;
+                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('loginBox').style.display = 'none';
+                document.getElementById('passInput').value = '';
+                render();
+            } else {
+                alert("كلمة المرور خاطئة!");
+            }
+        }
+
+        function render() {
+            let grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+            products.forEach(p => {
+                grid.innerHTML += `
+                    <div class="card">
+                        <img src="${p.image}">
+                        <h4>${p.name}</h4>
+                        <div class="price">${p.price} ر.س</div>
+                        <button class="btn-add" onclick="addToCart(${p.id})">إضافة للسلة</button>
+                        ${isAdmin ? `<button onclick="deleteProd(${p.id})" style="background:red;color:white;border:none;margin-top:5px;padding:5px;cursor:pointer;border-radius:3px;">حذف</button>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('addBtn').onclick = function() {
+            let name = document.getElementById('pName').value;
+            let price = parseFloat(document.getElementById('pPrice').value);
+            let img = document.getElementById('pImg').value || "https://via.placeholder.com/200";
+
+            if (name && price) {
+                products.push({ id: Date.now(), name, price, image: img });
+                saveToStorage();
+                render();
+                document.getElementById('pName').value = '';
+                document.getElementById('pPrice').value = '';
+                document.getElementById('pImg').value = '';
+            } else {
+                alert("يرجى إدخال الاسم والسعر!");
+            }
+        };
+
+        function deleteProd(id) {
+            products = products.filter(p => p.id !== id);
+            saveToStorage();
+            render();
+        }
+
+        function addToCart(id) {
+            let p = products.find(x => x.id === id);
+            cart.push(p);
+            updateCart();
+            validateForm();
+        }
+
+        function updateCart() {
+            let items = document.getElementById('cartItems');
+            let totalEl = document.getElementById('totalPrice');
+
+            if (cart.length === 0) {
+                items.innerHTML = '<p>السلة فارغة</p>';
+                totalEl.innerText = '0';
+                return;
+            }
+
+            items.innerHTML = '';
+            let total = 0;
+
+            cart.forEach((item) => {
+                total += item.price;
+                items.innerHTML += `<div class="cart-item"><span>${item.name}</span><b>${item.price} ر.س</b></div>`;
+            });
+
+            totalEl.innerText = total;
+        }
+
+        // دالة التحقق اللحظي أثناء الكتابة
+        function validateForm() {
+            let name = document.getElementById('custName').value.trim();
+            let phone = document.getElementById('custPhone').value.trim();
+            let city = document.getElementById('custCity').value.trim();
+            let mapUrl = document.getElementById('custMap').value.trim();
+            let sendBtn = document.getElementById('sendBtn');
+
+            // شروط التفعيل: السلة فيها منتجات + الخانات غير فارغة + رقم الجوال صحيح (10 أرقام ويبدأ بـ 05)
+            let phoneRegex = /^05\d{8}$/;
+            let isPhoneValid = phoneRegex.test(phone);
+
+            if (cart.length > 0 && name !== "" && isPhoneValid && city !== "" && mapUrl !== "") {
+                sendBtn.disabled = false; // تفعيل الزر
+            } else {
+                sendBtn.disabled = true; // تعطيل الزر
+            }
+        }
+
+        function sendOrder() {
+            let name = document.getElementById('custName').value.trim();
+            let phone = document.getElementById('custPhone').value.trim();
+            let city = document.getElementById('custCity').value.trim();
+            let mapUrl = document.getElementById('custMap').value.trim();
+
+            let total = 0;
+            let msg = `*طلب جديد من متجر فن الرماية*%0A%0A`;
+            msg += `*الاسم:* ${name}%0A`;
+            msg += `*رقم الجوال:* ${phone}%0A`;
+            msg += `*المدينة/الحي:* ${city}%0A`;
+            msg += `*موقع الخريطة (Google Maps):*%0A${mapUrl}%0A%0A`;
+            msg += `*طريقة الدفع:* تحويل بنكي%0A%0A`;
+            msg += `*المنتجات المطلوبة:*%0A`;
+
+            cart.forEach((item) => {
+                total += item.price;
+                msg += `- ${item.name} (${item.price} ر.س)%0A`;
+            });
+
+            msg += `%0A*الإجمالي النهائي:* ${total} ر.س`;
+
+            let waUrl = `https://wa.me/966546346251?text=${msg}`;
+            window.open(waUrl, '_blank');
+        }
+
+        render();
+    </script>
+</body>
+</html>
