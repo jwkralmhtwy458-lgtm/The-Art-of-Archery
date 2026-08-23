@@ -1,267 +1,372 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر فن الرماية</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background-color: #f4f6f9; color: #333; }
-        header { background: #1b2a47; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 22px; font-weight: bold; color: #e67e22; }
-        .btn-dev { background: #e67e22; color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; }
-        .banner { background: #2c3e50; color: white; text-align: center; padding: 30px 20px; }
-        
-        .login-box { display: none; background: #fff; border: 2px solid #e67e22; padding: 15px; margin: 15px auto; max-width: 400px; text-align: center; border-radius: 8px; }
-        .login-box input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; width: 60%; }
-        .login-box button { padding: 8px 15px; background: #e67e22; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>متجر فن الرماية</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+    body { background-color: #1a233a; color: white; padding: 20px; }
+    
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .nav-btns { display: flex; gap: 10px; }
+    .btn-nav { background-color: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+    .btn-dev { background-color: #e67e22; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+    .btn-support { background-color: #25D366; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-        .admin-panel { display: none; background: #fff; border: 2px solid #27ae60; padding: 20px; margin: 20px auto; max-width: 1000px; border-radius: 8px; }
-        .admin-panel input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
-        .admin-panel button { padding: 8px 15px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        
-        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; display: flex; gap: 20px; flex-wrap: wrap; }
-        .products { flex: 2; min-width: 300px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .card { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .card img { width: 100%; height: 140px; object-fit: cover; border-radius: 5px; }
-        .price { color: #27ae60; font-weight: bold; margin: 8px 0; }
-        .btn-add { background: #1b2a47; color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; }
-        
-        .sidebar { flex: 1; min-width: 280px; }
-        .cart-box, .checkout-box, .contact-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .cart-item { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        
-        .form-control { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid #ccc; border-radius: 4px; }
-        .bank-info { background: #eaf2f8; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 13px; border-right: 3px solid #3498db; }
-        
-        /* زر الإرسال مع المظهر المعطل */
-        .btn-send { background: #27ae60; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 15px; transition: 0.3s; }
-        .btn-send:disabled { background: #cccccc; cursor: not-allowed; opacity: 0.6; }
+    .welcome-title { text-align: center; margin-bottom: 30px; }
+    
+    .dev-panel { border: 2px solid #2ecc71; border-radius: 8px; padding: 15px; margin-bottom: 30px; text-align: center; display: none; background: #243356; }
+    .dev-panel input { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; width: 200px; }
+    .btn-add { background-color: #2ecc71; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
 
-        .btn-inquiry { background: #2980b9; color: white; text-decoration: none; display: block; text-align: center; padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 5px; }
-    </style>
+    .account-panel { border: 2px solid #3498db; border-radius: 8px; padding: 20px; margin-bottom: 30px; background: #243356; display: none; }
+    .account-panel input { padding: 8px; margin: 5px 0; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px; }
+
+    .main-layout { display: flex; gap: 20px; flex-wrap: wrap; }
+    .products-section { flex: 2; min-width: 300px; }
+    .side-section { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px; }
+
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .product-card { background-color: white; color: black; border-radius: 8px; padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+    .product-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; }
+    .no-img { width: 100%; height: 150px; background: #eee; display: flex; align-items: center; justify-content: center; color: #777; border-radius: 4px; }
+    
+    .btn-cart { background-color: #1a233a; color: white; width: 100%; padding: 8px; border: none; border-radius: 4px; margin-top: 10px; cursor: pointer; }
+    .box { background-color: white; color: black; padding: 15px; border-radius: 8px; }
+    .box input { width: 100%; padding: 8px; margin-top: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    .btn-confirm { background-color: #25D366; color: white; width: 100%; padding: 12px; border: none; border-radius: 4px; margin-top: 15px; font-weight: bold; cursor: pointer; font-size: 16px; }
+    .bank-details { background: #eef5fc; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 12px; }
+
+    .error-msg { color: #ff6b6b; font-size: 12px; display: none; margin-top: 3px; font-weight: bold; }
+    .invalid-input { border: 2px solid #e74c3c !important; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-box { background: white; color: black; padding: 25px; border-radius: 8px; text-align: center; max-width: 350px; width: 90%; }
+    .modal-box input { width: 100%; padding: 10px; margin: 15px 0; font-size: 18px; text-align: center; letter-spacing: 5px; }
+  </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">متجر فن الرماية</div>
-        <button id="devBtn" class="btn-dev" onclick="toggleDevMode()">وضع المطور</button>
-    </header>
+  <header>
+    <div class="nav-btns">
+      <button class="btn-nav" onclick="toggleAccountPanel()">حسابي الشخصي</button>
+      <button class="btn-dev" onclick="openDevPanel()">وضع المطور</button>
+      <button class="btn-support" onclick="openSupport()">الدعم الفني 💬</button>
+    </div>
+    <h2>متجر فن الرماية</h2>
+  </header>
 
-    <div class="banner">
-        <h2>مرحباً بك في متجر فن الرماية</h2>
-        <p>تصفح المنتجات وأكمل طلبك بسهولة</p>
+  <div class="welcome-title">
+    <h1>مرحباً بك في متجر فن الرماية</h1>
+    <p>تصفح المنتجات وأكمل طلبك بسهولة</p>
+  </div>
+
+  <div class="dev-panel" id="devPanel">
+    <h3>لوحة المطور</h3>
+    <br>
+    <input type="text" id="pName" placeholder="اسم المنتج">
+    <input type="number" id="pPrice" placeholder="السعر">
+    <input type="text" id="pImg" placeholder="رابط الصورة">
+    <button class="btn-add" onclick="addProduct()">إضافة المنتج</button>
+    <button onclick="closeDevPanel()" style="background:#7f8c8d; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">إغلاق</button>
+  </div>
+
+  <div class="account-panel" id="accountPanel">
+    <h3>حسابي الشخصي</h3>
+    <br>
+    <div id="loginForm">
+      <p>تسجيل الدخول / إنشاء حساب:</p>
+      <input type="text" id="userNameInput" placeholder="الاسم الكامل"><br>
+      <input type="text" id="userPhoneInput" maxlength="10" placeholder="رقم الجوال (05xxxxxxxx)" oninput="checkPhoneInput(this, 'loginPhoneErr')">
+      <div id="loginPhoneErr" class="error-msg">يجب أن يبدأ الرقم بـ 05 ويتكون من 10 أرقام.</div>
+      <br><br>
+      <button class="btn-nav" onclick="startLoginVerification()">تسجيل الدخول</button>
     </div>
 
-    <div class="login-box" id="loginBox">
-        <h4>تسجيل دخول المطور</h4>
-        <input type="password" id="passInput" placeholder="أدخل كلمة المرور">
-        <button id="checkPassBtn" onclick="loginDev()">دخول</button>
+    <div id="userInfo" style="display: none;">
+      <p><strong>اسم المستخدم:</strong> <span id="displayUserName"></span></p>
+      <p><strong>رقم الجوال:</strong> <span id="displayUserPhone"></span></p>
+      <br>
+      <button onclick="logoutUser()" style="background:#e74c3c; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">تسجيل الخروج</button>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <div class="products-section">
+      <h3>المنتجات</h3>
+      <br>
+      <div class="product-grid" id="productsList"></div>
     </div>
 
-    <div class="admin-panel" id="adminPanel">
-        <h3>لوحة المطور</h3>
-        <input type="text" id="pName" placeholder="اسم المنتج">
-        <input type="number" id="pPrice" placeholder="السعر">
-        <input type="text" id="pImg" placeholder="رابط الصورة">
-        <button id="addBtn">إضافة المنتج</button>
-    </div>
+    <div class="side-section">
+      <div class="box">
+        <h3>السلة</h3>
+        <div id="cartItems">السلة فارغة</div>
+        <hr style="margin: 10px 0;">
+        <strong>الإجمالي: <span id="cartTotal">0</span> ر.س</strong>
+      </div>
 
-    <div class="container">
-        <div class="products">
-            <h2>المنتجات</h2><br>
-            <div class="grid" id="productsGrid"></div>
+      <div class="box">
+        <h3>إتمام الطلب والدفع</h3>
+        <input type="text" id="orderName" placeholder="الاسم الكامل">
+        <input type="text" id="orderPhone" maxlength="10" placeholder="(05xxxxxxxx) رقم الجوال" oninput="checkPhoneInput(this, 'checkoutPhoneErr')">
+        <div id="checkoutPhoneErr" class="error-msg" style="color:red;">رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05</div>
+        
+        <input type="text" id="orderAddress" placeholder="المدينة / الحي / شارع">
+        <input type="text" id="orderMap" placeholder="رابط الموقع من Google Maps">
+        
+        <div class="bank-details">
+          <strong>طريقة الدفع: تحويل بنكي</strong><br>
+          تفاصيل الحساب البنكي:<br>
+          البنك: الأهلي / الراجحي<br>
+          الآيبان (IBAN):<br>
+          <code>SA0000000000000000000000</code><br>
+          <small>* سيتم إرسال رمز تحقق تلقائياً إلى واتساب العميل لتأكيد الطلب.</small>
         </div>
 
-        <div class="sidebar">
-            <div class="cart-box">
-                <h3>السلة</h3><br>
-                <div id="cartItems"><p>السلة فارغة</p></div>
-                <hr style="margin: 10px 0;">
-                <strong>الإجمالي: <span id="totalPrice">0</span> ر.س</strong>
-            </div>
-
-            <div class="checkout-box">
-                <h3>إتمام الطلب والدفع</h3>
-                
-                <input type="text" id="custName" class="form-control" placeholder="الاسم الكامل" oninput="validateForm()">
-                <input type="tel" id="custPhone" class="form-control" placeholder="رقم الجوال (05xxxxxxxx)" maxlength="10" oninput="validateForm()">
-                <input type="text" id="custCity" class="form-control" placeholder="المدينة / الحي" oninput="validateForm()">
-                <input type="url" id="custMap" class="form-control" placeholder="رابط الموقع (Google Maps)" oninput="validateForm()">
-
-                <div class="bank-info">
-                    <strong>طريقة الدفع: تحويل بنكي</strong><br><br>
-                    <strong>تفاصيل الحساب البنكي:</strong><br>
-                    البنك: الأهلي / الراجحي<br>
-                    الآيبان (IBAN):<br>
-                    <code style="background: #fff; padding: 2px 4px; border-radius: 3px;">SA0000000000000000000000</code><br>
-                    <small style="color: #555;">* يرجى التحويل وإرفاق إيصال التحويل عند إرسال الطلب.</small>
-                </div>
-
-                <button class="btn-send" id="sendBtn" onclick="sendOrder()" disabled>تأكيد وإرسال الطلب</button>
-            </div>
-
-            <div class="contact-box">
-                <h3>للاستفسارات</h3>
-                <p style="font-size: 13px; color: #666; margin-bottom: 8px;">لديك سؤال قبل الشراء؟ تواصل معنا مباشرة:</p>
-                <a href="https://wa.me/966546346251?text=مرحباً،%20لدي%20استفسار" target="_blank" class="btn-inquiry">تواصل مع الدعم الفني</a>
-            </div>
-        </div>
+        <button class="btn-confirm" onclick="startCheckoutVerification()">إرسال الطلب عبر الواتساب 📲</button>
+      </div>
     </div>
+  </div>
 
-    <script>
-        const defaultProducts = [
-            { id: 1, name: "هدف رماية", price: 120, image: "https://via.placeholder.com/200" },
-            { id: 2, name: "حقيبة معدات", price: 250, image: "https://via.placeholder.com/200" }
-        ];
+  <div class="modal-overlay" id="otpModal">
+    <div class="modal-box">
+      <h3>إدخال رمز التحقق</h3>
+      <p style="font-size: 13px; margin-top: 5px;">تم إرسال رمز التحقق عبر الواتساب إلى الرقم: <strong id="otpPhoneDisplay"></strong></p>
+      <input type="text" id="otpInput" maxlength="4" placeholder="0000">
+      <button class="btn-confirm" style="margin-top:0;" onclick="verifyOTP()">تأكيد الرمز وإرسال الطلب</button>
+      <button onclick="closeOtpModal()" style="background:none; border:none; color:#777; margin-top:10px; cursor:pointer;">إلغاء</button>
+    </div>
+  </div>
 
-        let products = JSON.parse(localStorage.getItem('my_saved_products')) || defaultProducts;
-        let cart = [];
-        let isAdmin = false;
+  <script>
+    const adminPhone1 = "966546346251"; // رقمك
+    const adminPhone2 = "966554412133"; // رقم شريكك
 
-        function saveToStorage() {
-            localStorage.setItem('my_saved_products', JSON.stringify(products));
+    // بيانات UltraMsg API من حسابك
+    const ULTRA_INSTANCE_ID = "instance189316";
+    const ULTRA_TOKEN = "8r4vs9jpdd6i99qh";
+
+    let products = [{ id: 1, name: "سلاح خشبي", price: 75, image: "" }];
+    let cart = [];
+    let currentUser = null;
+    let isDevMode = false;
+    let generatedOTP = null;
+    let otpActionType = "";
+
+    function validateSaudiPhone(phone) {
+      return /^05\d{8}$/.test(phone);
+    }
+
+    function checkPhoneInput(inputElement, errorMsgId) {
+      inputElement.value = inputElement.value.replace(/[^0-9]/g, '');
+      const errorDiv = document.getElementById(errorMsgId);
+      if (inputElement.value.length > 0 && !validateSaudiPhone(inputElement.value)) {
+        inputElement.classList.add('invalid-input');
+        if (errorDiv) errorDiv.style.display = 'block';
+      } else {
+        inputElement.classList.remove('invalid-input');
+        if (errorDiv) errorDiv.style.display = 'none';
+      }
+    }
+
+    function openSupport() {
+      let choice = confirm("تواصل مع الدعم الفني:\nاضغط (موافق) للتواصل مع الرقم الأول، أو (إلغاء) للرقم الثاني.");
+      let targetPhone = choice ? adminPhone1 : adminPhone2;
+      let url = `https://wa.me/${targetPhone}?text=${encodeURIComponent("السلام عليكم، أحتاج مساعدة/استفسار بخصوص متجر فن الرماية.")}`;
+      window.open(url, '_blank');
+    }
+
+    // دالة إرسال الرمز تلقائياً عبر UltraMsg API
+    async function sendOTPViaWhatsApp(userPhone, action) {
+      generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+      otpActionType = action;
+
+      let formattedPhone = "966" + userPhone.substring(1);
+      document.getElementById("otpPhoneDisplay").innerText = userPhone;
+      document.getElementById("otpInput").value = "";
+
+      const url = `https://api.ultramsg.com/${ULTRA_INSTANCE_ID}/messages/chat`;
+      const params = new URLSearchParams();
+      params.append('token', ULTRA_TOKEN);
+      params.append('to', formattedPhone);
+      params.append('body', `🎯 *متجر فن الرماية*\n\nرمز التحقق الخاص بك هو: *${generatedOTP}*\nالرجاء إدخاله في الموقع لتأكيد الطلب.`);
+
+      try {
+        let response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params
+        });
+        let resData = await response.json();
+        
+        if (resData.sent === "true" || resData.id) {
+          document.getElementById("otpModal").style.display = "flex";
+        } else {
+          alert("حدث خطأ أثناء إرسال الرسالة تلقائياً، جرب مرة أخرى.");
         }
+      } catch (err) {
+        alert("تنبيه: تعذر الاتصال بالسيرفر، تأكد من الاتصال بالإنترنت.");
+        console.error(err);
+      }
+    }
 
-        function toggleDevMode() {
-            let loginBox = document.getElementById('loginBox');
-            if(isAdmin) {
-                isAdmin = false;
-                document.getElementById('adminPanel').style.display = 'none';
-                loginBox.style.display = 'none';
-                render();
-            } else {
-                loginBox.style.display = (loginBox.style.display === 'block') ? 'none' : 'block';
-            }
+    function closeOtpModal() {
+      document.getElementById("otpModal").style.display = "none";
+    }
+
+    function verifyOTP() {
+      const userEnteredOTP = document.getElementById("otpInput").value.trim();
+      if (userEnteredOTP === generatedOTP) {
+        closeOtpModal();
+        if (otpActionType === "login") {
+          completeLogin();
+        } else if (otpActionType === "checkout") {
+          completeCheckoutAndSendWhatsApp();
         }
+      } else {
+        alert("رمز التحقق غير صحيح، حاول مرة أخرى.");
+      }
+    }
 
-        function loginDev() {
-            let pass = document.getElementById('passInput').value;
-            if (pass === "MS1212") {
-                isAdmin = true;
-                document.getElementById('adminPanel').style.display = 'block';
-                document.getElementById('loginBox').style.display = 'none';
-                document.getElementById('passInput').value = '';
-                render();
-            } else {
-                alert("كلمة المرور خاطئة!");
-            }
-        }
+    function startLoginVerification() {
+      const name = document.getElementById("userNameInput").value.trim();
+      const phone = document.getElementById("userPhoneInput").value.trim();
+      if (!name) return alert("يرجى كتابة الاسم الكامل");
+      if (!validateSaudiPhone(phone)) return alert("يرجى كتابة رقم جوال سعودي صحيح");
+      sendOTPViaWhatsApp(phone, "login");
+    }
 
-        function render() {
-            let grid = document.getElementById('productsGrid');
-            grid.innerHTML = '';
-            products.forEach(p => {
-                grid.innerHTML += `
-                    <div class="card">
-                        <img src="${p.image}">
-                        <h4>${p.name}</h4>
-                        <div class="price">${p.price} ر.س</div>
-                        <button class="btn-add" onclick="addToCart(${p.id})">إضافة للسلة</button>
-                        ${isAdmin ? `<button onclick="deleteProd(${p.id})" style="background:red;color:white;border:none;margin-top:5px;padding:5px;cursor:pointer;border-radius:3px;">حذف</button>` : ''}
-                    </div>
-                `;
-            });
-        }
+    function completeLogin() {
+      const name = document.getElementById("userNameInput").value.trim();
+      const phone = document.getElementById("userPhoneInput").value.trim();
+      currentUser = { name, phone };
+      document.getElementById("displayUserName").innerText = currentUser.name;
+      document.getElementById("displayUserPhone").innerText = currentUser.phone;
+      document.getElementById("orderName").value = currentUser.name;
+      document.getElementById("orderPhone").value = currentUser.phone;
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("userInfo").style.display = "block";
+      alert("تم تسجيل الدخول وتأكيد الرقم بنجاح!");
+    }
 
-        document.getElementById('addBtn').onclick = function() {
-            let name = document.getElementById('pName').value;
-            let price = parseFloat(document.getElementById('pPrice').value);
-            let img = document.getElementById('pImg').value || "https://via.placeholder.com/200";
+    function logoutUser() {
+      currentUser = null;
+      document.getElementById("loginForm").style.display = "block";
+      document.getElementById("userInfo").style.display = "none";
+    }
 
-            if (name && price) {
-                products.push({ id: Date.now(), name, price, image: img });
-                saveToStorage();
-                render();
-                document.getElementById('pName').value = '';
-                document.getElementById('pPrice').value = '';
-                document.getElementById('pImg').value = '';
-            } else {
-                alert("يرجى إدخال الاسم والسعر!");
-            }
-        };
+    function startCheckoutVerification() {
+      if (cart.length === 0) return alert("السلة فارغة!");
+      const name = document.getElementById("orderName").value.trim();
+      const phone = document.getElementById("orderPhone").value.trim();
+      const address = document.getElementById("orderAddress").value.trim();
 
-        function deleteProd(id) {
-            products = products.filter(p => p.id !== id);
-            saveToStorage();
-            render();
-        }
+      if (!name) return alert("يرجى كتابة الاسم الكامل");
+      if (!validateSaudiPhone(phone)) return alert("يرجى كتابة رقم جوال صحيح");
+      if (!address) return alert("يرجى كتابة العنوان");
 
-        function addToCart(id) {
-            let p = products.find(x => x.id === id);
-            cart.push(p);
-            updateCart();
-            validateForm();
-        }
+      sendOTPViaWhatsApp(phone, "checkout");
+    }
 
-        function updateCart() {
-            let items = document.getElementById('cartItems');
-            let totalEl = document.getElementById('totalPrice');
+    function completeCheckoutAndSendWhatsApp() {
+      const name = document.getElementById("orderName").value.trim();
+      const phone = document.getElementById("orderPhone").value.trim();
+      const address = document.getElementById("orderAddress").value.trim();
+      const map = document.getElementById("orderMap").value.trim() || "غير مدخل";
 
-            if (cart.length === 0) {
-                items.innerHTML = '<p>السلة فارغة</p>';
-                totalEl.innerText = '0';
-                return;
-            }
+      let total = cart.reduce((sum, item) => sum + item.price, 0);
+      let itemsNames = cart.map(i => `- ${i.name} (${i.price} ر.س)`).join("\n");
 
-            items.innerHTML = '';
-            let total = 0;
+      let message = `*طلب جديد من متجر فن الرماية* 🎯\n\n` +
+                    `👤 *اسم العميل:* ${name}\n` +
+                    `📱 *رقم الجوال:* ${phone}\n` +
+                    `📍 *العنوان:* ${address}\n` +
+                    `🗺️ *رابط الموقع:* ${map}\n\n` +
+                    `🛒 *المنتجات المطلوبة:*\n${itemsNames}\n\n` +
+                    `💰 *الإجمالي:* ${total} ر.س\n` +
+                    `✅ *حالة الرقم:* تم تأكيد ملكية الرقم عبر الواتساب.`;
 
-            cart.forEach((item) => {
-                total += item.price;
-                items.innerHTML += `<div class="cart-item"><span>${item.name}</span><b>${item.price} ر.س</b></div>`;
-            });
+      let whatsappUrl = `https://wa.me/${adminPhone1}?text=${encodeURIComponent(message)}`;
+      
+      alert("تم التأكد من الرمز بنجاح! جاري فتح الواتساب لإرسال بيانات الطلب كاملة إلى المتجر.");
+      window.open(whatsappUrl, '_blank');
 
-            totalEl.innerText = total;
-        }
+      cart = [];
+      renderCart();
+    }
 
-        // دالة التحقق اللحظي أثناء الكتابة
-        function validateForm() {
-            let name = document.getElementById('custName').value.trim();
-            let phone = document.getElementById('custPhone').value.trim();
-            let city = document.getElementById('custCity').value.trim();
-            let mapUrl = document.getElementById('custMap').value.trim();
-            let sendBtn = document.getElementById('sendBtn');
+    function openDevPanel() {
+      let password = prompt("أدخل كلمة سر وضع المطور:");
+      if (password === "MS1212") {
+        isDevMode = true;
+        document.getElementById("devPanel").style.display = "block";
+        renderProducts();
+      } else if (password !== null) alert("كلمة السر خاطئة!");
+    }
 
-            // شروط التفعيل: السلة فيها منتجات + الخانات غير فارغة + رقم الجوال صحيح (10 أرقام ويبدأ بـ 05)
-            let phoneRegex = /^05\d{8}$/;
-            let isPhoneValid = phoneRegex.test(phone);
+    function closeDevPanel() { document.getElementById("devPanel").style.display = "none"; }
+    function toggleAccountPanel() {
+      const panel = document.getElementById("accountPanel");
+      panel.style.display = panel.style.display === "none" || panel.style.display === "" ? "block" : "none";
+    }
 
-            if (cart.length > 0 && name !== "" && isPhoneValid && city !== "" && mapUrl !== "") {
-                sendBtn.disabled = false; // تفعيل الزر
-            } else {
-                sendBtn.disabled = true; // تعطيل الزر
-            }
-        }
+    function renderProducts() {
+      const container = document.getElementById("productsList");
+      container.innerHTML = "";
+      products.forEach(item => {
+        let devControls = isDevMode ? `
+          <button style="background:#f39c12; color:white; border:none; padding:4px; margin-top:4px;" onclick="editProduct(${item.id})">تعديل</button>
+          <button style="background:#e74c3c; color:white; border:none; padding:4px; margin-top:4px;" onclick="deleteProduct(${item.id})">حذف</button>
+        ` : '';
 
-        function sendOrder() {
-            let name = document.getElementById('custName').value.trim();
-            let phone = document.getElementById('custPhone').value.trim();
-            let city = document.getElementById('custCity').value.trim();
-            let mapUrl = document.getElementById('custMap').value.trim();
+        container.innerHTML += `
+          <div class="product-card">
+            <div>
+              ${item.image ? `<img src="${item.image}">` : `<div class="no-img">لا توجد صورة</div>`}
+              <h4 style="margin-top:8px;">${item.name}</h4>
+              <p style="color: green; font-weight: bold;">${item.price} ر.س</p>
+            </div>
+            <div>
+              <button class="btn-cart" onclick="addToCart(${item.id})">إضافة للسلة</button>
+              ${devControls}
+            </div>
+          </div>`;
+      });
+    }
 
-            let total = 0;
-            let msg = `*طلب جديد من متجر فن الرماية*%0A%0A`;
-            msg += `*الاسم:* ${name}%0A`;
-            msg += `*رقم الجوال:* ${phone}%0A`;
-            msg += `*المدينة/الحي:* ${city}%0A`;
-            msg += `*موقع الخريطة (Google Maps):*%0A${mapUrl}%0A%0A`;
-            msg += `*طريقة الدفع:* تحويل بنكي%0A%0A`;
-            msg += `*المنتجات المطلوبة:*%0A`;
+    function addProduct() {
+      const name = document.getElementById("pName").value.trim();
+      const price = parseFloat(document.getElementById("pPrice").value);
+      const img = document.getElementById("pImg").value.trim();
+      if (!name || isNaN(price)) return alert("أدخل بيانات المنتج صحيحة");
+      products.push({ id: Date.now(), name, price, image: img });
+      renderProducts();
+    }
 
-            cart.forEach((item) => {
-                total += item.price;
-                msg += `- ${item.name} (${item.price} ر.س)%0A`;
-            });
+    function addToCart(id) {
+      let item = products.find(p => p.id === id);
+      if (item) { cart.push(item); renderCart(); }
+    }
 
-            msg += `%0A*الإجمالي النهائي:* ${total} ر.س`;
+    function renderCart() {
+      const cartContainer = document.getElementById("cartItems");
+      if (cart.length === 0) {
+        cartContainer.innerHTML = "السلة فارغة";
+        document.getElementById("cartTotal").innerText = "0";
+        return;
+      }
+      let total = 0;
+      cartContainer.innerHTML = "";
+      cart.forEach((item, index) => {
+        total += item.price;
+        cartContainer.innerHTML += `<div style="display:flex; justify-content:space-between;"><span>${item.name}</span><span>${item.price} ر.س</span></div>`;
+      });
+      document.getElementById("cartTotal").innerText = total;
+    }
 
-            let waUrl = `https://wa.me/966546346251?text=${msg}`;
-            window.open(waUrl, '_blank');
-        }
-
-        render();
-    </script>
+    renderProducts();
+  </script>
 </body>
 </html>
