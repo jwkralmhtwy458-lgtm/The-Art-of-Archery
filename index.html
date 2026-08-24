@@ -105,7 +105,7 @@
     <div class="products-section">
       <h3>المنتجات</h3>
       <br>
-      <div class="product-grid" id="productsList"></div>
+      <div class="product-grid" id="productsList">جاري تحميل المنتجات...</div>
     </div>
 
     <div class="side-section">
@@ -156,13 +156,50 @@
     const ULTRA_INSTANCE_ID = "instance189316";
     const ULTRA_TOKEN = "8r4vs9jpdd6i99qh";
 
-    let products = [{ id: 1, name: "سلاح خشبي", price: 75, image: "" }];
+    // إعدادات الـ Database المربوطة بمفتاحك الخاص والـ Bin ID
+    const JSONBIN_BIN_ID = "6a8c57b5f5f4af5e293c7792";
+    const JSONBIN_MASTER_KEY = "$2a$10$bXswm0qT3/n5Sk7UDmy0F.HuwtlxHGp339IfRuYXYTjWz/o0PQS1u";
+
+    let products = [];
     let cart = [];
-    let productQuantities = { 1: 1 }; // لحفظ الكمية المختارة للمنتجات
+    let productQuantities = {};
     let currentUser = null;
     let isDevMode = false;
     let generatedOTP = null;
     let otpActionType = "";
+
+    async function loadProductsFromCloud() {
+      if (!JSONBIN_BIN_ID || JSONBIN_BIN_ID === "ضع_هنا_BIN_ID") {
+        document.getElementById("productsList").innerText = "يرجى وضع الـ BIN ID في السطر الخاص به لتعمل المنتجات السحابية.";
+        return;
+      }
+      try {
+        let response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+          headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+        });
+        let data = await response.json();
+        products = data.record || [];
+        renderProducts();
+      } catch (err) {
+        console.error("خطأ في جلب البيانات:", err);
+        document.getElementById("productsList").innerText = "حدث خطأ أثناء تحميل المنتجات.";
+      }
+    }
+
+    async function saveProductsToCloud() {
+      try {
+        await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_MASTER_KEY
+          },
+          body: JSON.stringify(products)
+        });
+      } catch (err) {
+        alert("تعذر حفظ التغييرات على السيرفر!");
+      }
+    }
 
     function validateSaudiPhone(phone) {
       return /^05\d{8}$/.test(phone);
@@ -187,7 +224,6 @@
       window.open(url, '_blank');
     }
 
-    // التحكم بكمية المنتجات قبل الإضافة
     function changeQty(id, delta) {
       if (!productQuantities[id]) productQuantities[id] = 1;
       productQuantities[id] += delta;
@@ -198,6 +234,10 @@
     function renderProducts() {
       const container = document.getElementById("productsList");
       container.innerHTML = "";
+      if (products.length === 0) {
+        container.innerHTML = "لا توجد منتجات حالياً.";
+        return;
+      }
       products.forEach(item => {
         if (!productQuantities[item.id]) productQuantities[item.id] = 1;
 
@@ -228,7 +268,6 @@
       });
     }
 
-    // إضافة وإدارة السلة
     function addToCart(id) {
       let item = products.find(p => p.id === id);
       let qtyToAdd = productQuantities[id] || 1;
@@ -283,8 +322,7 @@
       document.getElementById("cartTotal").innerText = total;
     }
 
-    // دوال وضع المطور (التعديل والحذف)
-    function editProduct(id) {
+    async function editProduct(id) {
       let item = products.find(p => p.id === id);
       if (!item) return;
 
@@ -297,24 +335,25 @@
         item.price = parseFloat(newPrice);
       }
 
-      let newImg = prompt("رابط الصورة الجديد (اتركه فارغاً لإزالة الصورة):", item.image);
+      let newImg = prompt("رابط الصورة الجديد:", item.image);
       if (newImg !== null) item.image = newImg.trim();
 
       renderProducts();
-      renderCart();
-      alert("تم تعديل المنتج بنجاح!");
+      await saveProductsToCloud();
+      alert("تمت التعديلات وحفظها سحابياً لجميع الزوار!");
     }
 
-    function deleteProduct(id) {
+    async function deleteProduct(id) {
       if (confirm("هل أنت تأكد من رغبتك في حذف هذا المنتج؟")) {
         products = products.filter(p => p.id !== id);
         cart = cart.filter(c => c.id !== id);
         renderProducts();
         renderCart();
+        await saveProductsToCloud();
       }
     }
 
-    function addProduct() {
+    async function addProduct() {
       const name = document.getElementById("pName").value.trim();
       const price = parseFloat(document.getElementById("pPrice").value);
       const img = document.getElementById("pImg").value.trim();
@@ -325,6 +364,8 @@
       document.getElementById("pPrice").value = "";
       document.getElementById("pImg").value = "";
       renderProducts();
+      await saveProductsToCloud();
+      alert("تمت إضافة المنتج وحفظه سحابياً لجميع الزوار!");
     }
 
     function openDevPanel() {
@@ -342,7 +383,6 @@
       panel.style.display = panel.style.display === "none" || panel.style.display === "" ? "block" : "none";
     }
 
-    // الواتساب ورمز التحقق
     async function sendOTPViaWhatsApp(userPhone, action) {
       generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
       otpActionType = action;
@@ -364,7 +404,6 @@
           body: params
         });
         let resData = await response.json();
-        
         if (resData.sent === "true" || resData.id) {
           document.getElementById("otpModal").style.display = "flex";
         } else {
@@ -448,14 +487,14 @@
 
       let whatsappUrl = `https://wa.me/${adminPhone1}?text=${encodeURIComponent(message)}`;
       
-      alert("تم التأكد من الرمز بنجاح! جاري فتح الواتساب لإرسال تفاصيل الطلب مع الأعداد الكلية.");
+      alert("تم التأكد من الرمز بنجاح! جاري فتح الواتساب لإرسال تفاصيل الطلب.");
       window.open(whatsappUrl, '_blank');
 
       cart = [];
       renderCart();
     }
 
-    renderProducts();
+    loadProductsFromCloud();
   </script>
 </body>
 </html>
