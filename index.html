@@ -17,7 +17,9 @@
     .welcome-title { text-align: center; margin-bottom: 30px; }
     
     .dev-panel { border: 2px solid #2ecc71; border-radius: 8px; padding: 15px; margin-bottom: 30px; text-align: center; display: none; background: #243356; }
-    .dev-panel input { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; width: 200px; }
+    .dev-panel input { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; width: 220px; }
+    .file-input-wrapper { display: inline-block; position: relative; }
+    .file-input-wrapper input[type="file"] { background: white; color: black; padding: 6px; cursor: pointer; }
     .btn-add { background-color: #2ecc71; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
 
     .account-panel { border: 2px solid #3498db; border-radius: 8px; padding: 20px; margin-bottom: 30px; background: #243356; display: none; }
@@ -76,7 +78,9 @@
     <br>
     <input type="text" id="pName" placeholder="اسم المنتج">
     <input type="number" id="pPrice" placeholder="السعر">
-    <input type="text" id="pImg" placeholder="رابط الصورة">
+    <div class="file-input-wrapper">
+      <input type="file" id="pImageFile" accept="image/*">
+    </div>
     <button class="btn-add" onclick="addProduct()">إضافة المنتج</button>
     <button onclick="closeDevPanel()" style="background:#7f8c8d; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">إغلاق</button>
   </div>
@@ -156,7 +160,6 @@
     const ULTRA_INSTANCE_ID = "instance189316";
     const ULTRA_TOKEN = "8r4vs9jpdd6i99qh";
 
-    // إعدادات الـ Database المربوطة بمفتاحك الخاص والـ Bin ID
     const JSONBIN_BIN_ID = "6a8c57b5f5f4af5e293c7792";
     const JSONBIN_MASTER_KEY = "$2a$10$bXswm0qT3/n5Sk7UDmy0F.HuwtlxHGp339IfRuYXYTjWz/o0PQS1u";
 
@@ -335,9 +338,6 @@
         item.price = parseFloat(newPrice);
       }
 
-      let newImg = prompt("رابط الصورة الجديد:", item.image);
-      if (newImg !== null) item.image = newImg.trim();
-
       renderProducts();
       await saveProductsToCloud();
       alert("تمت التعديلات وحفظها سحابياً لجميع الزوار!");
@@ -353,19 +353,41 @@
       }
     }
 
+    // دالة تحويل ملف الصورة إلى نص Base64
+    function convertFileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
     async function addProduct() {
       const name = document.getElementById("pName").value.trim();
       const price = parseFloat(document.getElementById("pPrice").value);
-      const img = document.getElementById("pImg").value.trim();
+      const fileInput = document.getElementById("pImageFile");
+
       if (!name || isNaN(price)) return alert("أدخل بيانات المنتج بشكل صحيح");
-      
-      products.push({ id: Date.now(), name: name, price: price, image: img });
+
+      let imageBase64 = "";
+      if (fileInput.files && fileInput.files[0]) {
+        try {
+          imageBase64 = await convertFileToBase64(fileInput.files[0]);
+        } catch (e) {
+          alert("حدث خطأ أثناء قراءة ملف الصورة.");
+          return;
+        }
+      }
+
+      products.push({ id: Date.now(), name: name, price: price, image: imageBase64 });
       document.getElementById("pName").value = "";
       document.getElementById("pPrice").value = "";
-      document.getElementById("pImg").value = "";
+      fileInput.value = ""; // إعادة ضبط حقل اختيار الصورة
+
       renderProducts();
       await saveProductsToCloud();
-      alert("تمت إضافة المنتج وحفظه سحابياً لجميع الزوار!");
+      alert("تمت إضافة المنتج بنجاح مع الصورة وحفظه سحابياً!");
     }
 
     function openDevPanel() {
