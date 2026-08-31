@@ -55,8 +55,6 @@
     .modal-box { background: white; color: black; padding: 25px; border-radius: 8px; text-align: center; max-width: 380px; width: 90%; }
     .modal-box input { width: 100%; padding: 10px; margin: 10px 0; font-size: 18px; font-weight: bold; }
     .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-    
-    .btn-manual-otp { background-color: #f39c12; color: white; border: none; width: 100%; padding: 8px; border-radius: 4px; margin-bottom: 10px; cursor: pointer; font-size: 13px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -145,21 +143,17 @@
     </div>
   </div>
 
-  <!-- نافذة الـ OTP -->
   <div class="modal-overlay" id="otpModal">
     <div class="modal-box">
       <h3>رمز التحقق (OTP) 🔒</h3>
-      <p style="font-size: 13px; margin: 10px 0;">تم إنشاء رمز التحقق للرقم: <strong id="otpPhoneDisplay"></strong></p>
-      
-      <button class="btn-manual-otp" onclick="openWhatsAppOTP()">لم يصلك الرمز؟ اضغط هنا لاستلامه عبر الواتساب 📲</button>
-      
-      <input type="text" id="otpInput" maxlength="4" placeholder="أدخل الرمز المكون من 4 أرقام" style="text-align:center; letter-spacing:5px;">
+      <p style="font-size: 13px; margin: 10px 0;">جاري إرسال الرمز تلقائياً للرقم: <strong id="otpPhoneDisplay"></strong></p>
+
+      <input type="text" id="otpInput" maxlength="4" placeholder="0000" style="text-align:center; letter-spacing:5px;">
       <button class="btn-confirm" style="margin-top:0;" onclick="verifyOTP()">تأكيد الرمز ودخول</button>
       <button onclick="closeOtpModal()" style="background:none; border:none; color:#777; margin-top:10px; cursor:pointer;">إلغاء</button>
     </div>
   </div>
 
-  <!-- نافذة التعديل -->
   <div class="modal-overlay" id="editModal">
     <div class="modal-box">
       <h3>تعديل المنتج</h3>
@@ -174,11 +168,11 @@
   </div>
 
   <script>
-    const adminPhone1 = "966546346251"; 
-    const adminPhone2 = "966554412133"; 
+    const ownerPhone = "966546346251"; 
 
-    const ULTRA_INSTANCE_ID = "instance189316";
-    const ULTRA_TOKEN = "8r4vs9jpdd6i99qh";
+    // بيانات حسابك في UltraMsg مدمجة مباشرة
+    const ULTRA_INSTANCE_ID = "instance190124";
+    const ULTRA_TOKEN = "e5q2838w8nwlmm4l"; 
 
     const JSONBIN_BIN_ID = "6a8c57b5f5f4af5e293c7792";
     const JSONBIN_MASTER_KEY = "$2a$10$bXswm0qT3/n5Sk7UDmy0F.HuwtlxHGp339IfRuYXYTjWz/o0PQS1u";
@@ -190,7 +184,6 @@
     let isDevMode = false;
     let generatedOTP = null;
     let otpActionType = "";
-    let currentTargetPhone = "";
 
     async function loadProductsFromCloud() {
       try {
@@ -202,7 +195,6 @@
         renderProducts();
       } catch (err) {
         console.error("خطأ في جلب البيانات:", err);
-        document.getElementById("productsList").innerText = "حدث خطأ أثناء تحميل المنتجات.";
       }
     }
 
@@ -239,9 +231,7 @@
     }
 
     function openSupport() {
-      let choice = confirm("تواصل مع الدعم الفني:\nاضغط (موافق) للتواصل مع الرقم الأول، أو (إلغاء) للرقم الثاني.");
-      let targetPhone = choice ? adminPhone1 : adminPhone2;
-      let url = `https://wa.me/${targetPhone}?text=${encodeURIComponent("السلام عليكم، أحتاج مساعدة/استفسار بخصوص متجر فن الرماية.")}`;
+      let url = `https://wa.me/${ownerPhone}?text=${encodeURIComponent("السلام عليكم، أحتاج مساعدة بخصوص متجر فن الرماية.")}`;
       window.open(url, '_blank');
     }
 
@@ -354,9 +344,7 @@
       document.getElementById("editModal").style.display = "flex";
     }
 
-    function closeEditModal() {
-      document.getElementById("editModal").style.display = "none";
-    }
+    function closeEditModal() { document.getElementById("editModal").style.display = "none"; }
 
     async function saveProductEdit(id) {
       let item = products.find(p => p.id === id);
@@ -374,11 +362,11 @@
 
       if (editFile.files && editFile.files[0]) {
         try {
-          btnSave.innerText = "جاري رفع الصورة والتحديث...";
+          btnSave.innerText = "جاري الحفظ...";
           btnSave.disabled = true;
           item.image = await compressAndResizeImage(editFile.files[0], 400, 0.7);
         } catch (e) {
-          alert("حدث خطأ في تحميل الصورة.");
+          alert("خطأ في معالجة الصورة.");
           btnSave.innerText = "حفظ التعديلات";
           btnSave.disabled = false;
           return;
@@ -391,11 +379,11 @@
       btnSave.innerText = "حفظ التعديلات";
       btnSave.disabled = false;
       closeEditModal();
-      alert("تمت التحديث وإضافة الصورة بنجاح!");
+      alert("تمت العملية بنجاح!");
     }
 
     async function deleteProduct(id) {
-      if (confirm("هل أنت تأكد من حذف المنتج؟")) {
+      if (confirm("هل أنت تأكد من الحذف؟")) {
         products = products.filter(p => p.id !== id);
         cart = cart.filter(c => c.id !== id);
         renderProducts();
@@ -507,35 +495,38 @@
       triggerOTPFlow(phone, "checkout");
     }
 
-    function triggerOTPFlow(userPhone, action) {
+    async function triggerOTPFlow(userPhone, action) {
       generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
       otpActionType = action;
-      currentTargetPhone = userPhone;
 
       document.getElementById("otpPhoneDisplay").innerText = userPhone;
       document.getElementById("otpInput").value = "";
       document.getElementById("otpModal").style.display = "flex";
 
-      // محاولة الإرسال التلقائي عبر السيرفر
       let formattedPhone = "966" + userPhone.substring(1);
-      const url = `https://api.ultramsg.com/${ULTRA_INSTANCE_ID}/messages/chat`;
+      
+      // إرسال كود OTP عبر البروكسي إلى UltraMsg تلقائياً
+      const targetUrl = `https://api.ultramsg.com/${ULTRA_INSTANCE_ID}/messages/chat`;
+      const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(targetUrl);
+
       const params = new URLSearchParams();
       params.append('token', ULTRA_TOKEN);
       params.append('to', formattedPhone);
       params.append('body', `🎯 *متجر فن الرماية*\n\nرمز التحقق الخاص بك هو: *${generatedOTP}*`);
 
-      fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params
-      }).catch(err => console.log("تنبيه: يمكنك استخدام زر الواتساب اليدوي للحصول على الرمز."));
-    }
-
-    function openWhatsAppOTP() {
-      let formattedPhone = "966" + currentTargetPhone.substring(1);
-      let text = `🎯 *رمز التحقق لمتجر فن الرماية*\n\nرمزك هو: *${generatedOTP}*\nيرجى كتابته في الموقع للتأكيد.`;
-      let url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      try {
+        let res = await fetch(proxyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params
+        });
+        let data = await res.json();
+        if(data.sent === "true" || data.id) {
+          console.log("تم إرسال الرمز بنجاح لـ UltraMsg!");
+        }
+      } catch (err) {
+        console.error("خطأ في إرسال الرمز تلقائياً:", err);
+      }
     }
 
     function closeOtpModal() { document.getElementById("otpModal").style.display = "none"; }
@@ -547,7 +538,7 @@
         if (otpActionType === "login") completeLogin();
         else if (otpActionType === "checkout") completeCheckoutAndSendWhatsApp();
       } else {
-        alert("رمز التحقق غير صحيح، يرجى التأكد وإعادة المحاولة.");
+        alert("رمز التحقق غير صحيح، يرجى إعادة المحاولة.");
       }
     }
 
@@ -561,7 +552,7 @@
       document.getElementById("orderPhone").value = currentUser.phone;
       document.getElementById("loginForm").style.display = "none";
       document.getElementById("userInfo").style.display = "block";
-      alert("تم التأكد من الرمز وتسجيل الدخول بنجاح!");
+      alert("تم تسجيل الدخول بنجاح!");
     }
 
     function logoutUser() {
@@ -587,9 +578,9 @@
                     `🛒 *المنتجات المطلوبة:*\n${itemsNames}\n\n` +
                     `💰 *الإجمالي النهائي:* ${total} ر.س`;
 
-      let whatsappUrl = `https://wa.me/${adminPhone1}?text=${encodeURIComponent(message)}`;
+      let whatsappUrl = `https://wa.me/${ownerPhone}?text=${encodeURIComponent(message)}`;
       
-      alert("تم التحقق بنجاح! جاري إرسال الطلب عبر الواتساب.");
+      alert("تم التحقق بنجاح! جاري إرسال الطلب إلى الواتساب الخاص بالمتجر.");
       window.open(whatsappUrl, '_blank');
 
       cart = [];
