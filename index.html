@@ -53,8 +53,10 @@
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
     .modal-box { background: white; color: black; padding: 25px; border-radius: 8px; text-align: center; max-width: 380px; width: 90%; }
-    .modal-box input { width: 100%; padding: 10px; margin: 10px 0; font-size: 16px; }
+    .modal-box input { width: 100%; padding: 10px; margin: 10px 0; font-size: 18px; font-weight: bold; }
     .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    
+    .btn-manual-otp { background-color: #f39c12; color: white; border: none; width: 100%; padding: 8px; border-radius: 4px; margin-bottom: 10px; cursor: pointer; font-size: 13px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -143,22 +145,27 @@
     </div>
   </div>
 
+  <!-- نافذة الـ OTP -->
   <div class="modal-overlay" id="otpModal">
     <div class="modal-box">
-      <h3>إدخال رمز التحقق</h3>
-      <p style="font-size: 13px; margin-top: 5px;">تم إرسال رمز التحقق عبر الواتساب إلى الرقم: <strong id="otpPhoneDisplay"></strong></p>
-      <input type="text" id="otpInput" maxlength="4" placeholder="0000" style="text-align:center; letter-spacing:5px;">
-      <button class="btn-confirm" style="margin-top:0;" onclick="verifyOTP()">تأكيد الرمز وإرسال الطلب</button>
+      <h3>رمز التحقق (OTP) 🔒</h3>
+      <p style="font-size: 13px; margin: 10px 0;">تم إنشاء رمز التحقق للرقم: <strong id="otpPhoneDisplay"></strong></p>
+      
+      <button class="btn-manual-otp" onclick="openWhatsAppOTP()">لم يصلك الرمز؟ اضغط هنا لاستلامه عبر الواتساب 📲</button>
+      
+      <input type="text" id="otpInput" maxlength="4" placeholder="أدخل الرمز المكون من 4 أرقام" style="text-align:center; letter-spacing:5px;">
+      <button class="btn-confirm" style="margin-top:0;" onclick="verifyOTP()">تأكيد الرمز ودخول</button>
       <button onclick="closeOtpModal()" style="background:none; border:none; color:#777; margin-top:10px; cursor:pointer;">إلغاء</button>
     </div>
   </div>
 
+  <!-- نافذة التعديل -->
   <div class="modal-overlay" id="editModal">
     <div class="modal-box">
       <h3>تعديل المنتج</h3>
       <input type="text" id="editName" placeholder="اسم المنتج">
       <input type="number" id="editPrice" placeholder="السعر">
-      <p style="font-size:12px; margin-top:5px;">اختيار صورة جديدة (اختياري):</p>
+      <p style="font-size:12px; margin-top:5px;">تغيير/إضافة صورة للمنتج (اختياري):</p>
       <input type="file" id="editImageFile" accept="image/*">
       <br><br>
       <button class="btn-confirm" id="btnSaveEdit" style="margin-top:0;">حفظ التعديلات</button>
@@ -183,7 +190,7 @@
     let isDevMode = false;
     let generatedOTP = null;
     let otpActionType = "";
-    let currentEditId = null;
+    let currentTargetPhone = "";
 
     async function loadProductsFromCloud() {
       try {
@@ -339,7 +346,6 @@
     function openEditModal(id) {
       let item = products.find(p => p.id === id);
       if (!item) return;
-      currentEditId = id;
       document.getElementById("editName").value = item.name;
       document.getElementById("editPrice").value = item.price;
       document.getElementById("editImageFile").value = "";
@@ -361,18 +367,18 @@
       const editFile = document.getElementById("editImageFile");
       const btnSave = document.getElementById("btnSaveEdit");
 
-      if (!newName || isNaN(newPrice)) return alert("يرجى التأكد من كتابة الاسم والسعر بأسلوب صحيح.");
+      if (!newName || isNaN(newPrice)) return alert("يرجى كتابة الاسم والسعر بشكل صحيح.");
 
       item.name = newName;
       item.price = newPrice;
 
       if (editFile.files && editFile.files[0]) {
         try {
-          btnSave.innerText = "جاري معالجة الصورة والتحديث...";
+          btnSave.innerText = "جاري رفع الصورة والتحديث...";
           btnSave.disabled = true;
           item.image = await compressAndResizeImage(editFile.files[0], 400, 0.7);
         } catch (e) {
-          alert("حدث خطأ في تحميل الصورة الجديدة.");
+          alert("حدث خطأ في تحميل الصورة.");
           btnSave.innerText = "حفظ التعديلات";
           btnSave.disabled = false;
           return;
@@ -385,11 +391,11 @@
       btnSave.innerText = "حفظ التعديلات";
       btnSave.disabled = false;
       closeEditModal();
-      alert("تم حفظ التعديلات وإضافة الصورة بنجاح!");
+      alert("تمت التحديث وإضافة الصورة بنجاح!");
     }
 
     async function deleteProduct(id) {
-      if (confirm("هل أنت تأكد من رغبتك في حذف هذا المنتج؟")) {
+      if (confirm("هل أنت تأكد من حذف المنتج؟")) {
         products = products.filter(p => p.id !== id);
         cart = cart.filter(c => c.id !== id);
         renderProducts();
@@ -479,80 +485,13 @@
       panel.style.display = panel.style.display === "none" || panel.style.display === "" ? "block" : "none";
     }
 
-    async function sendOTPViaWhatsApp(userPhone, action) {
-      generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
-      otpActionType = action;
-
-      let formattedPhone = "966" + userPhone.substring(1);
-      document.getElementById("otpPhoneDisplay").innerText = userPhone;
-      document.getElementById("otpInput").value = "";
-
-      const url = `https://api.ultramsg.com/${ULTRA_INSTANCE_ID}/messages/chat`;
-      const params = new URLSearchParams();
-      params.append('token', ULTRA_TOKEN);
-      params.append('to', formattedPhone);
-      params.append('body', `🎯 *متجر فن الرماية*\n\nرمز التحقق الخاص بك هو: *${generatedOTP}*\nالرجاء إدخاله في الموقع لتأكيد العملية.`);
-
-      try {
-        let response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: params
-        });
-        let resData = await response.json();
-        if (resData.sent === "true" || resData.id) {
-          document.getElementById("otpModal").style.display = "flex";
-        } else {
-          throw new Error("فشل الوالواتساب التلقائي");
-        }
-      } catch (err) {
-        // في حال فشل السيرفر التلقائي يتجاوز خطأ الاتصال ويسجل دخول العميل فوراً أو يقبل الرمز
-        if (action === "login") {
-          completeLogin();
-        } else {
-          document.getElementById("otpModal").style.display = "flex";
-        }
-      }
-    }
-
-    function closeOtpModal() { document.getElementById("otpModal").style.display = "none"; }
-
-    function verifyOTP() {
-      const userEnteredOTP = document.getElementById("otpInput").value.trim();
-      if (userEnteredOTP === generatedOTP || userEnteredOTP !== "") {
-        closeOtpModal();
-        if (otpActionType === "login") completeLogin();
-        else if (otpActionType === "checkout") completeCheckoutAndSendWhatsApp();
-      } else {
-        alert("رمز التحقق غير صحيح، حاول مرة أخرى.");
-      }
-    }
-
     function startLoginVerification() {
       const name = document.getElementById("userNameInput").value.trim();
       const phone = document.getElementById("userPhoneInput").value.trim();
       if (!name) return alert("يرجى كتابة الاسم الكامل");
       if (!validateSaudiPhone(phone)) return alert("يرجى كتابة رقم جوال سعودي صحيح");
-      sendOTPViaWhatsApp(phone, "login");
-    }
-
-    function completeLogin() {
-      const name = document.getElementById("userNameInput").value.trim();
-      const phone = document.getElementById("userPhoneInput").value.trim();
-      currentUser = { name, phone };
-      document.getElementById("displayUserName").innerText = currentUser.name;
-      document.getElementById("displayUserPhone").innerText = currentUser.phone;
-      document.getElementById("orderName").value = currentUser.name;
-      document.getElementById("orderPhone").value = currentUser.phone;
-      document.getElementById("loginForm").style.display = "none";
-      document.getElementById("userInfo").style.display = "block";
-      alert("تم تسجيل الدخول بنجاح!");
-    }
-
-    function logoutUser() {
-      currentUser = null;
-      document.getElementById("loginForm").style.display = "block";
-      document.getElementById("userInfo").style.display = "none";
+      
+      triggerOTPFlow(phone, "login");
     }
 
     function startCheckoutVerification() {
@@ -565,7 +504,70 @@
       if (!validateSaudiPhone(phone)) return alert("يرجى كتابة رقم جوال صحيح");
       if (!address) return alert("يرجى كتابة العنوان");
 
-      sendOTPViaWhatsApp(phone, "checkout");
+      triggerOTPFlow(phone, "checkout");
+    }
+
+    function triggerOTPFlow(userPhone, action) {
+      generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+      otpActionType = action;
+      currentTargetPhone = userPhone;
+
+      document.getElementById("otpPhoneDisplay").innerText = userPhone;
+      document.getElementById("otpInput").value = "";
+      document.getElementById("otpModal").style.display = "flex";
+
+      // محاولة الإرسال التلقائي عبر السيرفر
+      let formattedPhone = "966" + userPhone.substring(1);
+      const url = `https://api.ultramsg.com/${ULTRA_INSTANCE_ID}/messages/chat`;
+      const params = new URLSearchParams();
+      params.append('token', ULTRA_TOKEN);
+      params.append('to', formattedPhone);
+      params.append('body', `🎯 *متجر فن الرماية*\n\nرمز التحقق الخاص بك هو: *${generatedOTP}*`);
+
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
+      }).catch(err => console.log("تنبيه: يمكنك استخدام زر الواتساب اليدوي للحصول على الرمز."));
+    }
+
+    function openWhatsAppOTP() {
+      let formattedPhone = "966" + currentTargetPhone.substring(1);
+      let text = `🎯 *رمز التحقق لمتجر فن الرماية*\n\nرمزك هو: *${generatedOTP}*\nيرجى كتابته في الموقع للتأكيد.`;
+      let url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    function closeOtpModal() { document.getElementById("otpModal").style.display = "none"; }
+
+    function verifyOTP() {
+      const userEnteredOTP = document.getElementById("otpInput").value.trim();
+      if (userEnteredOTP === generatedOTP) {
+        closeOtpModal();
+        if (otpActionType === "login") completeLogin();
+        else if (otpActionType === "checkout") completeCheckoutAndSendWhatsApp();
+      } else {
+        alert("رمز التحقق غير صحيح، يرجى التأكد وإعادة المحاولة.");
+      }
+    }
+
+    function completeLogin() {
+      const name = document.getElementById("userNameInput").value.trim();
+      const phone = document.getElementById("userPhoneInput").value.trim();
+      currentUser = { name, phone };
+      document.getElementById("displayUserName").innerText = currentUser.name;
+      document.getElementById("displayUserPhone").innerText = currentUser.phone;
+      document.getElementById("orderName").value = currentUser.name;
+      document.getElementById("orderPhone").value = currentUser.phone;
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("userInfo").style.display = "block";
+      alert("تم التأكد من الرمز وتسجيل الدخول بنجاح!");
+    }
+
+    function logoutUser() {
+      currentUser = null;
+      document.getElementById("loginForm").style.display = "block";
+      document.getElementById("userInfo").style.display = "none";
     }
 
     function completeCheckoutAndSendWhatsApp() {
@@ -587,7 +589,7 @@
 
       let whatsappUrl = `https://wa.me/${adminPhone1}?text=${encodeURIComponent(message)}`;
       
-      alert("جاري فتح الواتساب لإرسال تفاصيل الطلب.");
+      alert("تم التحقق بنجاح! جاري إرسال الطلب عبر الواتساب.");
       window.open(whatsappUrl, '_blank');
 
       cart = [];
