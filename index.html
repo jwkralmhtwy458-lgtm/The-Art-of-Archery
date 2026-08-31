@@ -108,7 +108,7 @@
     <div class="products-section">
       <h3>المنتجات</h3>
       <br>
-      <div class="product-grid" id="productsList">جاري التحميل...</div>
+      <div class="product-grid" id="productsList">جاري تحميل المنتجات...</div>
     </div>
 
     <div class="side-section">
@@ -179,24 +179,52 @@
     let generatedOTP = null;
     let otpActionType = "";
 
-    function loadProductsFromCloud() {
-      try {
-        let saved = localStorage.getItem("store_products");
-        products = saved ? JSON.parse(saved) : [];
-        renderProducts();
-      } catch (err) {
-        console.error("خطأ قراءة الذاكرة:", err);
-        products = [];
-        renderProducts();
-      }
+    // تهيئة قاعدة البيانات IndexedDB للحل النهائي لمشاكل الجوال
+    let db;
+    function initDatabase() {
+      return new Promise((resolve, reject) => {
+        let request = indexedDB.open("ShootingArtStoreDB", 1);
+        request.onupgradeneeded = function(e) {
+          db = e.target.result;
+          if (!db.objectStoreNames.contains("products")) {
+            db.createObjectStore("products", { keyPath: "id" });
+          }
+        };
+        request.onsuccess = function(e) {
+          db = e.target.result;
+          resolve();
+        };
+        request.onerror = function(e) {
+          console.error("خطأ فتح قاعدة البيانات", e);
+          reject(e);
+        };
+      });
     }
 
-    function saveProductsToCloud() {
-      try {
-        localStorage.setItem("store_products", JSON.stringify(products));
-      } catch (e) {
-        alert("تنبيه: امتصت الصور كامل ذاكرة الجوال! جرب إضافة المنتج بدون صورة أو بحجم أصغر.");
-      }
+    async function loadProductsFromCloud() {
+      if (!db) await initDatabase();
+      let tx = db.transaction("products", "readonly");
+      let store = tx.objectStore("products");
+      let request = store.getAll();
+
+      request.onsuccess = function() {
+        products = request.result || [];
+        renderProducts();
+      };
+    }
+
+    async function saveProductToDB(product) {
+      if (!db) await initDatabase();
+      let tx = db.transaction("products", "readwrite");
+      let store = tx.objectStore("products");
+      store.put(product);
+    }
+
+    async function deleteProductFromDB(id) {
+      if (!db) await initDatabase();
+      let tx = db.transaction("products", "readwrite");
+      let store = tx.objectStore("products");
+      store.delete(id);
     }
 
     function validateSaudiPhone(phone) {
@@ -369,7 +397,7 @@
         try {
           btnSave.innerText = "جاري الحفظ...";
           btnSave.disabled = true;
-          item.image = await compressAndResizeImage(editFile.files[0], 150, 0.3);
+          item.image = await compressAndResizeImage(editFile.files[0], 300, 0.6);
         } catch (e) {
           alert("خطأ في معالجة الصورة.");
           btnSave.innerText = "حفظ التعديلات";
@@ -378,8 +406,8 @@
         }
       }
 
+      await saveProductToDB(item);
       renderProducts();
-      saveProductsToCloud();
       
       btnSave.innerText = "حفظ التعديلات";
       btnSave.disabled = false;
@@ -387,18 +415,17 @@
       alert("تمت العملية بنجاح!");
     }
 
-    function deleteProduct(id) {
+    async function deleteProduct(id) {
       if (confirm("هل أنت تأكد من الحذف؟")) {
         products = products.filter(p => p.id !== id);
         cart = cart.filter(c => c.id !== id);
+        await deleteProductFromDB(id);
         renderProducts();
         renderCart();
-        saveProductsToCloud();
       }
     }
 
-    // ضغط عالي وحجم خفيف للصور يناسب ذاكرة الجوالات
-    function compressAndResizeImage(file, maxWidth = 150, quality = 0.3) {
+    function compressAndResizeImage(file, maxWidth = 300, quality = 0.6) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -441,7 +468,7 @@
         try {
           btnAdd.innerText = "جاري الحفظ...";
           btnAdd.disabled = true;
-          imageBase64 = await compressAndResizeImage(fileInput.files[0], 150, 0.3);
+          imageBase64 = await compressAndResizeImage(fileInput.files[0], 300, 0.6);
         } catch (e) {
           alert("حدث خطأ أثناء معالجة الصورة.");
           btnAdd.innerText = "إضافة المنتج";
@@ -453,10 +480,11 @@
         btnAdd.disabled = true;
       }
 
-      products.push({ id: Date.now(), name: name, price: price, image: imageBase64 });
+      let newProduct = { id: Date.now(), name: name, price: price, image: imageBase64 };
+      products.push(newProduct);
       
+      await saveProductToDB(newProduct);
       renderProducts();
-      saveProductsToCloud();
 
       document.getElementById("pName").value = "";
       document.getElementById("pPrice").value = "";
@@ -596,6 +624,7 @@
       renderCart();
     }
 
+    // بدء التحميل من قاعدة بيانات الجوال
     loadProductsFromCloud();
   </script>
 </body>
