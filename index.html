@@ -172,6 +172,9 @@
     const ULTRA_INSTANCE_ID = "instance190124";
     const ULTRA_TOKEN = "e5q2838w8nwlmm4l"; 
 
+    // رابط API الخاص بـ npoint لحفظ المنتجات سحابياً
+    const NPOINT_URL = "https://api.npoint.io/938690a1ed35917cffc8"; 
+
     let products = [];
     let cart = [];
     let productQuantities = {};
@@ -180,14 +183,18 @@
     let generatedOTP = null;
     let otpActionType = "";
 
-    function loadProductsFromCloud() {
+    async function loadProductsFromCloud() {
       try {
-        let localData = localStorage.getItem("store_products");
-        products = localData ? JSON.parse(localData) : [];
+        let res = await fetch(NPOINT_URL);
+        let data = await res.json();
+        products = Array.isArray(data) ? data : [];
         renderProducts();
       } catch (err) {
         console.error("خطأ في جلب البيانات:", err);
+        products = [];
+        renderProducts();
       }
+    }
     }
 
     function saveProductsToCloud() {
