@@ -172,9 +172,6 @@
     const ULTRA_INSTANCE_ID = "instance190124";
     const ULTRA_TOKEN = "e5q2838w8nwlmm4l"; 
 
-    // رابط API الخاص بـ npoint لحفظ المنتجات سحابياً
-    const NPOINT_URL = "https://api.npoint.io/938690a1ed35917cffc8"; 
-
     let products = [];
     let cart = [];
     let productQuantities = {};
@@ -183,35 +180,24 @@
     let generatedOTP = null;
     let otpActionType = "";
 
-    async function loadProductsFromCloud() {
+    // جلب المنتجات المخزنة من ذاكرة المتصفح
+    function loadProductsFromCloud() {
       try {
-        let res = await fetch(NPOINT_URL);
-        let data = await res.json();
-        products = Array.isArray(data) ? data : [];
-        renderProducts();
-      } catch (err) {
-        console.error("خطأ في جلب البيانات من السحابة، محاولة الجلب المحلي:", err);
         let saved = localStorage.getItem("store_products");
         products = saved ? JSON.parse(saved) : [];
+        renderProducts();
+      } catch (err) {
+        products = [];
         renderProducts();
       }
     }
 
-    async function saveProductsToCloud() {
-      // حفظ محلي احتياطي
+    // حفظ المنتجات في ذاكرة المتصفح مباشرة لعدم اختفائها
+    function saveProductsToCloud() {
       try {
         localStorage.setItem("store_products", JSON.stringify(products));
-      } catch (e) {}
-
-      // حفظ سحابي حقيقي في Npoint
-      try {
-        await fetch(NPOINT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(products)
-        });
-      } catch (err) {
-        console.error("خطأ أثناء الحفظ السحابي:", err);
+      } catch (e) {
+        console.error("خطأ بالحفظ المحتوي", e);
       }
     }
 
@@ -383,7 +369,7 @@
 
       if (editFile.files && editFile.files[0]) {
         try {
-          btnSave.innerText = "جاري الضغط والحفظ...";
+          btnSave.innerText = "جاري الحفظ...";
           btnSave.disabled = true;
           item.image = await compressAndResizeImage(editFile.files[0], 250, 0.4);
         } catch (e) {
@@ -395,7 +381,7 @@
       }
 
       renderProducts();
-      await saveProductsToCloud();
+      saveProductsToCloud();
       
       btnSave.innerText = "حفظ التعديلات";
       btnSave.disabled = false;
@@ -403,13 +389,13 @@
       alert("تمت العملية بنجاح!");
     }
 
-    async function deleteProduct(id) {
+    function deleteProduct(id) {
       if (confirm("هل أنت تأكد من الحذف؟")) {
         products = products.filter(p => p.id !== id);
         cart = cart.filter(c => c.id !== id);
         renderProducts();
         renderCart();
-        await saveProductsToCloud();
+        saveProductsToCloud();
       }
     }
 
@@ -454,7 +440,7 @@
       let imageBase64 = "";
       if (fileInput.files && fileInput.files[0]) {
         try {
-          btnAdd.innerText = "جاري المعالجة والحفظ...";
+          btnAdd.innerText = "جاري الحفظ...";
           btnAdd.disabled = true;
           imageBase64 = await compressAndResizeImage(fileInput.files[0], 250, 0.4);
         } catch (e) {
@@ -471,7 +457,7 @@
       products.push({ id: Date.now(), name: name, price: price, image: imageBase64 });
       
       renderProducts();
-      await saveProductsToCloud();
+      saveProductsToCloud();
 
       document.getElementById("pName").value = "";
       document.getElementById("pPrice").value = "";
@@ -479,7 +465,7 @@
       btnAdd.innerText = "إضافة المنتج";
       btnAdd.disabled = false;
 
-      alert("تمت إضافة المنتج وحفظه سحابياً بنجاح!");
+      alert("تمت إضافة المنتج بنجاح ولن يختفي بعد الآن عند تحديث الصفحة!");
     }
 
     function openDevPanel() {
