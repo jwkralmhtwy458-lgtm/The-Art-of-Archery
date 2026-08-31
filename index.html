@@ -1,180 +1,8 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>متجر فن الرماية</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-    body { background-color: #1a233a; color: white; padding: 20px; }
-    
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .nav-btns { display: flex; gap: 10px; }
-    .btn-nav { background-color: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
-    .btn-dev { background-color: #e67e22; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
-    .btn-support { background-color: #25D366; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-
-    .welcome-title { text-align: center; margin-bottom: 30px; }
-    
-    .dev-panel { border: 2px solid #2ecc71; border-radius: 8px; padding: 15px; margin-bottom: 30px; text-align: center; display: none; background: #243356; }
-    .dev-panel input { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; width: 220px; }
-    .file-input-wrapper { display: inline-block; position: relative; }
-    .file-input-wrapper input[type="file"] { background: white; color: black; padding: 6px; cursor: pointer; }
-    .btn-add { background-color: #2ecc71; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
-
-    .account-panel { border: 2px solid #3498db; border-radius: 8px; padding: 20px; margin-bottom: 30px; background: #243356; display: none; }
-    .account-panel input { padding: 8px; margin: 5px 0; border-radius: 4px; border: 1px solid #ccc; width: 100%; max-width: 300px; }
-
-    .main-layout { display: flex; gap: 20px; flex-wrap: wrap; }
-    .products-section { flex: 2; min-width: 300px; }
-    .side-section { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px; }
-
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
-    .product-card { background-color: white; color: black; border-radius: 8px; padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
-    .product-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; }
-    .no-img { width: 100%; height: 150px; background: #eee; display: flex; align-items: center; justify-content: center; color: #777; border-radius: 4px; }
-    
-    .qty-control { display: flex; justify-content: center; align-items: center; gap: 5px; margin: 10px 0; }
-    .btn-qty { background: #3498db; color: white; border: none; width: 28px; height: 28px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; }
-    .qty-input { width: 45px; height: 28px; text-align: center; font-weight: bold; font-size: 15px; border: 1px solid #ccc; border-radius: 4px; }
-
-    .btn-cart { background-color: #1a233a; color: white; width: 100%; padding: 8px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .dev-btns { display: flex; gap: 5px; margin-top: 8px; }
-    .btn-edit { background-color: #f39c12; color: white; border: none; flex: 1; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .btn-delete { background-color: #e74c3c; color: white; border: none; flex: 1; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-
-    .box { background-color: white; color: black; padding: 15px; border-radius: 8px; }
-    .box input { width: 100%; padding: 8px; margin-top: 8px; border: 1px solid #ccc; border-radius: 4px; }
-    .btn-confirm { background-color: #25D366; color: white; width: 100%; padding: 12px; border: none; border-radius: 4px; margin-top: 15px; font-weight: bold; cursor: pointer; font-size: 16px; }
-    .bank-details { background: #eef5fc; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 12px; }
-
-    .error-msg { color: #ff6b6b; font-size: 12px; display: none; margin-top: 3px; font-weight: bold; }
-    .invalid-input { border: 2px solid #e74c3c !important; }
-
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
-    .modal-box { background: white; color: black; padding: 25px; border-radius: 8px; text-align: center; max-width: 380px; width: 90%; }
-    .modal-box input { width: 100%; padding: 10px; margin: 10px 0; font-size: 18px; font-weight: bold; }
-    .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="nav-btns">
-      <button class="btn-nav" onclick="toggleAccountPanel()">حسابي الشخصي</button>
-      <button class="btn-dev" onclick="openDevPanel()">وضع المطور</button>
-      <button class="btn-support" onclick="openSupport()">الدعم الفني 💬</button>
-    </div>
-    <h2>متجر فن الرماية</h2>
-  </header>
-
-  <div class="welcome-title">
-    <h1>مرحباً بك في متجر فن الرماية</h1>
-    <p>تصفح المنتجات وأكمل طلبك بسهولة</p>
-  </div>
-
-  <div class="dev-panel" id="devPanel">
-    <h3>لوحة المطور</h3>
-    <br>
-    <input type="text" id="pName" placeholder="اسم المنتج">
-    <input type="number" id="pPrice" placeholder="السعر">
-    <div class="file-input-wrapper">
-      <input type="file" id="pImageFile" accept="image/*">
-    </div>
-    <button class="btn-add" id="btnAddProd" onclick="addProduct()">إضافة المنتج</button>
-    <button onclick="closeDevPanel()" style="background:#7f8c8d; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">إغلاق</button>
-  </div>
-
-  <div class="account-panel" id="accountPanel">
-    <h3>حسابي الشخصي</h3>
-    <br>
-    <div id="loginForm">
-      <p>تسجيل الدخول / إنشاء حساب:</p>
-      <input type="text" id="userNameInput" placeholder="الاسم الكامل"><br>
-      <input type="text" id="userPhoneInput" maxlength="10" placeholder="رقم الجوال (05xxxxxxxx)" oninput="checkPhoneInput(this, 'loginPhoneErr')">
-      <div id="loginPhoneErr" class="error-msg">يجب أن يبدأ الرقم بـ 05 ويتكون من 10 أرقام.</div>
-      <br><br>
-      <button class="btn-nav" onclick="startLoginVerification()">تسجيل الدخول</button>
-    </div>
-
-    <div id="userInfo" style="display: none;">
-      <p><strong>اسم المستخدم:</strong> <span id="displayUserName"></span></p>
-      <p><strong>رقم الجوال:</strong> <span id="displayUserPhone"></span></p>
-      <br>
-      <button onclick="logoutUser()" style="background:#e74c3c; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">تسجيل الخروج</button>
-    </div>
-  </div>
-
-  <div class="main-layout">
-    <div class="products-section">
-      <h3>المنتجات</h3>
-      <br>
-      <div class="product-grid" id="productsList">جاري تحميل المنتجات...</div>
-    </div>
-
-    <div class="side-section">
-      <div class="box">
-        <h3>السلة</h3>
-        <div id="cartItems">السلة فارغة</div>
-        <hr style="margin: 10px 0;">
-        <strong>الإجمالي: <span id="cartTotal">0</span> ر.س</strong>
-      </div>
-
-      <div class="box">
-        <h3>إتمام الطلب والدفع</h3>
-        <input type="text" id="orderName" placeholder="الاسم الكامل">
-        <input type="text" id="orderPhone" maxlength="10" placeholder="(05xxxxxxxx) رقم الجوال" oninput="checkPhoneInput(this, 'checkoutPhoneErr')">
-        <div id="checkoutPhoneErr" class="error-msg" style="color:red;">رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05</div>
-        
-        <input type="text" id="orderAddress" placeholder="المدينة / الحي / شارع">
-        <input type="text" id="orderMap" placeholder="رابط الموقع من Google Maps">
-        
-        <div class="bank-details">
-          <strong>طريقة الدفع: تحويل بنكي</strong><br>
-          تفاصيل الحساب البنكي:<br>
-          البنك: الأهلي / الراجحي<br>
-          الآيبان (IBAN):<br>
-          <code>SA0000000000000000000000</code><br>
-          <small>* سيتم تأكيد الطلب فور إرساله عبر الواتساب.</small>
-        </div>
-
-        <button class="btn-confirm" onclick="startCheckoutVerification()">إرسال الطلب عبر الواتساب 📲</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="otpModal">
-    <div class="modal-box">
-      <h3>رمز التحقق (OTP) 🔒</h3>
-      <p style="font-size: 13px; margin: 10px 0;">جاري إرسال الرمز للرقم: <strong id="otpPhoneDisplay"></strong></p>
-
-      <input type="text" id="otpInput" maxlength="4" placeholder="0000" style="text-align:center; letter-spacing:5px;">
-      <button class="btn-confirm" style="margin-top:0;" onclick="verifyOTP()">تأكيد الرمز ودخول</button>
-      <button onclick="closeOtpModal()" style="background:none; border:none; color:#777; margin-top:10px; cursor:pointer;">إلغاء</button>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="editModal">
-    <div class="modal-box">
-      <h3>تعديل المنتج</h3>
-      <input type="text" id="editName" placeholder="اسم المنتج">
-      <input type="number" id="editPrice" placeholder="السعر">
-      <p style="font-size:12px; margin-top:5px;">تغيير/إضافة صورة للمنتج (اختياري):</p>
-      <input type="file" id="editImageFile" accept="image/*">
-      <br><br>
-      <button class="btn-confirm" id="btnSaveEdit" style="margin-top:0;">حفظ التعديلات</button>
-      <button onclick="closeEditModal()" style="background:none; border:none; color:#777; margin-top:10px; cursor:pointer;">إلغاء</button>
-    </div>
-  </div>
-
-  <script>
+<script>
     const ownerPhone = "966546346251"; 
 
     const ULTRA_INSTANCE_ID = "instance190124";
     const ULTRA_TOKEN = "e5q2838w8nwlmm4l"; 
-
-    const JSONBIN_BIN_ID = "6a8c57b5f5f4af5e293c7792";
-    const JSONBIN_MASTER_KEY = "$2a$10$bXswm0qT3/n5Sk7UDmy0F.HuwtlxHGp339IfRuYXYTjWz/o0PQS1u";
 
     let products = [];
     let cart = [];
@@ -184,32 +12,23 @@
     let generatedOTP = null;
     let otpActionType = "";
 
-    async function loadProductsFromCloud() {
+    // جلب البيانات من التخزين المحلي للمتصفح
+    function loadProductsFromCloud() {
       try {
-        let response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-          headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
-        });
-        let data = await response.json();
-        products = data.record || [];
+        let localData = localStorage.getItem("store_products");
+        products = localData ? JSON.parse(localData) : [];
         renderProducts();
       } catch (err) {
-        console.error("خطأ في جلب البيانات:", err);
+        console.error("خطأ في جلب البيانات المحلية:", err);
       }
     }
 
-    async function saveProductsToCloud() {
+    // حفظ البيانات في التخزين المحلي فوراً وبدون أخطاء سحابية
+    function saveProductsToCloud() {
       try {
-        let response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': JSONBIN_MASTER_KEY
-          },
-          body: JSON.stringify(products)
-        });
-        if(!response.ok) throw new Error("سعة البيانات ممتلئة");
+        localStorage.setItem("store_products", JSON.stringify(products));
       } catch (err) {
-        alert("تنبيه: حجم الصور المرفوعة كبير جداً. يرجى استخدام صورة بحجم أصغر.");
+        alert("تنبيه: تعذر حفظ البيانات محلياً. حجم الصور قد يكون كبيراً جداً.");
       }
     }
 
@@ -393,7 +212,7 @@
       }
 
       renderProducts();
-      await saveProductsToCloud();
+      saveProductsToCloud();
       
       btnSave.innerText = "حفظ التعديلات";
       btnSave.disabled = false;
@@ -407,7 +226,7 @@
         cart = cart.filter(c => c.id !== id);
         renderProducts();
         renderCart();
-        await saveProductsToCloud();
+        saveProductsToCloud();
       }
     }
 
@@ -466,7 +285,7 @@
       products.push({ id: Date.now(), name: name, price: price, image: imageBase64 });
       
       renderProducts();
-      await saveProductsToCloud();
+      saveProductsToCloud();
 
       document.getElementById("pName").value = "";
       document.getElementById("pPrice").value = "";
@@ -608,5 +427,3 @@
 
     loadProductsFromCloud();
   </script>
-</body>
-</html>
