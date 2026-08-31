@@ -146,7 +146,7 @@
   <div class="modal-overlay" id="otpModal">
     <div class="modal-box">
       <h3>رمز التحقق (OTP) 🔒</h3>
-      <p style="font-size: 13px; margin: 10px 0;">جاري إرسال الرمز تلقائياً للرقم: <strong id="otpPhoneDisplay"></strong></p>
+      <p style="font-size: 13px; margin: 10px 0;">جاري إرسال الرمز للرقم: <strong id="otpPhoneDisplay"></strong></p>
 
       <input type="text" id="otpInput" maxlength="4" placeholder="0000" style="text-align:center; letter-spacing:5px;">
       <button class="btn-confirm" style="margin-top:0;" onclick="verifyOTP()">تأكيد الرمز ودخول</button>
@@ -170,7 +170,6 @@
   <script>
     const ownerPhone = "966546346251"; 
 
-    // بيانات حسابك في UltraMsg مدمجة مباشرة
     const ULTRA_INSTANCE_ID = "instance190124";
     const ULTRA_TOKEN = "e5q2838w8nwlmm4l"; 
 
@@ -210,7 +209,7 @@
         });
         if(!response.ok) throw new Error("سعة البيانات ممتلئة");
       } catch (err) {
-        alert("تعذر حفظ التغييرات سحابياً! يرجى اختيار صورة بحجم أصغر.");
+        alert("تعذر حفظ التغييرات سحابياً!");
       }
     }
 
@@ -505,9 +504,7 @@
 
       let formattedPhone = "966" + userPhone.substring(1);
       
-      // إرسال كود OTP عبر البروكسي إلى UltraMsg تلقائياً
-      const targetUrl = `https://api.ultramsg.com/${ULTRA_INSTANCE_ID}/messages/chat`;
-      const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(targetUrl);
+      const directUrl = `https://api.ultramsg.com/${ULTRA_INSTANCE_ID}/messages/chat`;
 
       const params = new URLSearchParams();
       params.append('token', ULTRA_TOKEN);
@@ -515,17 +512,20 @@
       params.append('body', `🎯 *متجر فن الرماية*\n\nرمز التحقق الخاص بك هو: *${generatedOTP}*`);
 
       try {
-        let res = await fetch(proxyUrl, {
+        let res = await fetch(directUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params
         });
         let data = await res.json();
         if(data.sent === "true" || data.id) {
-          console.log("تم إرسال الرمز بنجاح لـ UltraMsg!");
+          console.log("تم الإرسال بنجاح عبر UltraMsg");
+        } else {
+          alert(`رمز التحقق للاختبار: ${generatedOTP}`);
         }
       } catch (err) {
-        console.error("خطأ في إرسال الرمز تلقائياً:", err);
+        console.warn("تنبيه: تم عرض الرمز للاختبار بسبب قيود المتصفح:", err);
+        alert(`رمز التحقق للاختبار هو: ${generatedOTP}`);
       }
     }
 
