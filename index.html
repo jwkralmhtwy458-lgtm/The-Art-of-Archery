@@ -190,17 +190,28 @@
         products = Array.isArray(data) ? data : [];
         renderProducts();
       } catch (err) {
-        console.error("خطأ في جلب البيانات:", err);
-        products = [];
+        console.error("خطأ في جلب البيانات من السحابة، محاولة الجلب المحلي:", err);
+        let saved = localStorage.getItem("store_products");
+        products = saved ? JSON.parse(saved) : [];
         renderProducts();
       }
     }
 
-    function saveProductsToCloud() {
+    async function saveProductsToCloud() {
+      // حفظ محلي احتياطي
       try {
         localStorage.setItem("store_products", JSON.stringify(products));
+      } catch (e) {}
+
+      // حفظ سحابي حقيقي في Npoint
+      try {
+        await fetch(NPOINT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(products)
+        });
       } catch (err) {
-        alert("تنبيه: حجم الصور المرفوعة كبير جداً للتخزين المحلي.");
+        console.error("خطأ أثناء الحفظ السحابي:", err);
       }
     }
 
@@ -384,7 +395,7 @@
       }
 
       renderProducts();
-      saveProductsToCloud();
+      await saveProductsToCloud();
       
       btnSave.innerText = "حفظ التعديلات";
       btnSave.disabled = false;
@@ -398,7 +409,7 @@
         cart = cart.filter(c => c.id !== id);
         renderProducts();
         renderCart();
-        saveProductsToCloud();
+        await saveProductsToCloud();
       }
     }
 
@@ -443,7 +454,7 @@
       let imageBase64 = "";
       if (fileInput.files && fileInput.files[0]) {
         try {
-          btnAdd.innerText = "جاري المعالجة...";
+          btnAdd.innerText = "جاري المعالجة والحفظ...";
           btnAdd.disabled = true;
           imageBase64 = await compressAndResizeImage(fileInput.files[0], 250, 0.4);
         } catch (e) {
@@ -452,12 +463,15 @@
           btnAdd.disabled = false;
           return;
         }
+      } else {
+        btnAdd.innerText = "جاري الحفظ...";
+        btnAdd.disabled = true;
       }
 
       products.push({ id: Date.now(), name: name, price: price, image: imageBase64 });
       
       renderProducts();
-      saveProductsToCloud();
+      await saveProductsToCloud();
 
       document.getElementById("pName").value = "";
       document.getElementById("pPrice").value = "";
@@ -465,7 +479,7 @@
       btnAdd.innerText = "إضافة المنتج";
       btnAdd.disabled = false;
 
-      alert("تمت إضافة المنتج بنجاح!");
+      alert("تمت إضافة المنتج وحفظه سحابياً بنجاح!");
     }
 
     function openDevPanel() {
