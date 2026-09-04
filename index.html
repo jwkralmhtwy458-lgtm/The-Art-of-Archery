@@ -123,12 +123,25 @@
       </div>
 
  
-       <!-- قسم إتمام الطلب والدفع -->
+       <!-- قسم إتمام الطلب والدفع --><!-- قسم إتمام الطلب والدفع -->
 <div class="box">
   <h3>إتمام الطلب والدفع</h3>
   <input type="text" id="orderName" placeholder="الاسم الكامل">
   <input type="text" id="orderPhone" maxlength="10" placeholder="رقم الجوال (05xxxxxxxx)" oninput="checkPhoneInput(this, 'checkoutPhoneErr')">
   <div id="checkoutPhoneErr" class="error-msg" style="color:red;">رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05</div>
+
+  <!-- حقول العنوان داخل البطاقة -->
+  <input type="text" id="orderAddress" placeholder="المدينة / الحي / شارع" style="margin-top: 10px;">
+  <input type="text" id="orderMapLink" placeholder="رابط الموقع من Google Maps" style="margin-top: 10px;">
+
+  <!-- تفاصيل الدفع بلون واضح -->
+  <div style="margin-top: 15px; padding: 12px; background: #f9f9f9; border-radius: 8px; color: #222; text-align: right;">
+    <p style="margin: 4px 0; font-weight: bold; color: #000;">طريقة الدفع: تحويل بنكي</p>
+    <p style="margin: 4px 0; color: #333;">تفاصيل الحساب البنكي:</p>
+    <p style="margin: 4px 0; color: #333;">البنك: الأهلي / الراجحي</p>
+    <p style="margin: 4px 0; color: #111; font-weight: bold;">الأيبان (IBAN): SA0000000000000000000000</p>
+ <p style="margin-top: 8px; font-size: 11px; color: #555;">* سيتم تأكيد الطلب فور إرساله عبر الواتساب.</p>
+  </div>
 </div>
 
 <!-- نافذة الـ OTP -->
