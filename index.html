@@ -122,12 +122,31 @@
         <strong>الإجمالي: <span id="cartTotal">0</span> ر.س</strong>
       </div>
 
-      <div class="box">
-        <h3>إتمام الطلب والدفع</h3>
-        <input type="text" id="orderName" placeholder="الاسم الكامل">
-        <input type="text" id="orderPhone" maxlength="10" placeholder="(05xxxxxxxx) رقم الجوال" oninput="checkPhoneInput(this, 'checkoutPhoneErr')">
-        <div id="checkoutPhoneErr" class="error-msg" style="color:red;">رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05</div>
-        
+ 
+       <!-- قسم إتمام الطلب والدفع -->
+<div class="box">
+  <h3>إتمام الطلب والدفع</h3>
+  <input type="text" id="orderName" placeholder="الاسم الكامل">
+  <input type="text" id="orderPhone" maxlength="10" placeholder="رقم الجوال (05xxxxxxxx)" oninput="checkPhoneInput(this, 'checkoutPhoneErr')">
+  <div id="checkoutPhoneErr" class="error-msg" style="color:red;">رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05</div>
+</div>
+
+<!-- نافذة الـ OTP -->
+<div class="modal-overlay" id="otpModal">
+  <div class="modal-box">
+    <h3>رمز التحقق (OTP) 🔒</h3>
+    <p style="font-size: 13px; margin: 10px 0;">جاري إرسال الرمز للرقم: <strong id="otpPhoneDisplay"></strong></p>
+
+    <input type="text" id="otpInput" maxlength="4" placeholder="0000" style="text-align:center; letter-spacing:5px;">
+    
+    <p style="font-size: 11px; color: #666; margin: 8px 0; line-height: 1.4;">
+      💡 إذا لم يصلك إشعار، افتح تطبيق الواتساب أو استخدم الرمز الظاهر في التنبيه.
+    </p>
+
+    <button class="btn-confirm" style="margin-top:5px;" onclick="verifyOTP()">تأكيد الرمز ودخول</button>
+    <button onclick="closeOtpModal()" style="background:none; border:none; color:#777; margin-top:10px; cursor:pointer;">إلغاء</button>
+  </div>
+</div>
         <input type="text" id="orderAddress" placeholder="المدينة / الحي / شارع">
         <input type="text" id="orderMap" placeholder="رابط الموقع من Google Maps">
         
