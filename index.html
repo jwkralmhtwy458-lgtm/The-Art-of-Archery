@@ -122,30 +122,20 @@
         <strong>الإجمالي: <span id="cartTotal">0</span> ر.س</strong>
       </div>
 
- 
-       <!-- قسم إتمام الطلب والدفع --><!-- قسم إتمام الطلب والدفع -->
-<div class="box">
-  <h3>إتمام الطلب والدفع</h3>
-  <input type="text" id="orderName" placeholder="الاسم الكامل">
-  <input type="text" id="orderPhone" maxlength="10" placeholder="رقم الجوال (05xxxxxxxx)" oninput="checkPhoneInput(this, 'checkoutPhoneErr')">
-  <div id="checkoutPhoneErr" class="error-msg" style="color:red;">رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05</div>
+<!-- قسم إتمام الطلب والدفع -->
+      <div class="box">
+        <h3>إتمام الطلب والدفع</h3>
+        <input type="text" id="orderName" placeholder="الاسم الكامل">
+        <input type="text" id="orderPhone" maxlength="10" placeholder="رقم الجوال (05xxxxxxxx)" oninput="checkPhoneInput(this, 'checkoutPhoneErr')">
+        <div id="checkoutPhoneErr" class="error-msg" style="color:red;">رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05</div>
 
-
-<!-- حقول العنوان داخل البطاقة -->
+        <!-- حقول العنوان داخل البطاقة -->
         <input type="text" id="orderMapLink" placeholder="رابط الموقع من Google Maps" style="margin-top: 10px;">
         <p style="margin-top: 8px; font-size: 11px; color: #555;">* سيتم تأكيد الطلب فور إرساله عبر الواتساب.</p>
-      </div>
-
-      <button class="btn-confirm" onclick="sendOrderToWhatsApp()">إرسال الطلب عبر الواتساب 📲</button>>
-<p style="margin-top: 8px; font-size: 11px; color: #555;">* سيتم تأكيد الطلب فور إرساله عبر الواتساب.</p>
-        </div>
-
         <button class="btn-confirm" onclick="sendOrderToWhatsApp()">إرسال الطلب عبر الواتساب 📲</button>
       </div>
     </div>
   </div>
-  </div>
-
 
 
   <div class="modal-overlay" id="editModal">
