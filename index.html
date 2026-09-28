@@ -73,7 +73,7 @@
   <div class="welcome-title">
     <h2>مرحباً بك في متجر فن الرماية</h2>
     <p style="font-size:13px; color:#ccc;">تصفح المنتجات وأكمل طلبك بسهولة</p>
-  </div>
+<button class="btn-nav" onclick="loginUserDirect()">تسجيل الدخول</button>
 
   <div class="dev-panel" id="devPanel">
     <h3>لوحة المطور</h3>
@@ -132,27 +132,13 @@
 
   <!-- حقول العنوان داخل البطاقة -->
   <input type="text" id="orderAddress" placeholder="المدينة / الحي / شارع" style="margin-top: 10px;">
-  <input type="text" id="orderMapLink" placeholder="رابط الموقع من Google Maps" style="margin-top: 10px;">
+<p style="margin-top: 8px; font-size: 11px; color: #555;">* سيتم تأكيد الطلب فور إرساله عبر الواتساب.</p>
+        </div>
 
-  <!-- تفاصيل الدفع بلون واضح -->
-  <div style="margin-top: 15px; padding: 12px; background: #f9f9f9; border-radius: 8px; color: #222; text-align: right;">
-    <p style="margin: 4px 0; font-weight: bold; color: #000;">طريقة الدفع: تحويل بنكي</p>
-    <p style="margin: 4px 0; color: #333;">تفاصيل الحساب البنكي:</p>
-    <p style="margin: 4px 0; color: #333;">البنك: الأهلي / الراجحي</p>
-    <p style="margin: 4px 0; color: #111; font-weight: bold;">الأيبان (IBAN): SA0000000000000000000000</p>
- <p style="margin-top: 8px; font-size: 11px; color: #555;">* سيتم تأكيد الطلب فور إرساله عبر الواتساب.</p>
-  </div>
-</div>
-
-n>
-  </div>
-</div>
-        
-          </div>
-
-       <button class="btn-confirm" onclick="sendOrderToWhatsApp()">إرسال الطلب عبر الواتساب 📲</button>
+        <button class="btn-confirm" onclick="sendOrderToWhatsApp()">إرسال الطلب عبر الواتساب 📲</button>
       </div>
     </div>
+  </div>
   </div>
 
 
@@ -574,11 +560,33 @@ n>
       document.getElementById("userInfo").style.display = "none";
     }
 
-    function completeCheckoutAndSendWhatsApp() {
+  function loginUserDirect() {
+      const name = document.getElementById("userNameInput").value.trim();
+      const phone = document.getElementById("userPhoneInput").value.trim();
+      if (!name) return alert("يرجى كتابة الاسم الكامل");
+      if (!validateSaudiPhone(phone)) return alert("يرجى كتابة رقم جوال سعودي صحيح");
+      
+      currentUser = { name, phone };
+      document.getElementById("displayUserName").innerText = currentUser.name;
+      document.getElementById("displayUserPhone").innerText = currentUser.phone;
+      document.getElementById("orderName").value = currentUser.name;
+      document.getElementById("orderPhone").value = currentUser.phone;
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("userInfo").style.display = "block";
+      alert("تم تسجيل الدخول بنجاح!");
+    }
+
+    function sendOrderToWhatsApp() {
+      if (cart.length === 0) return alert("السلة فارغة!");
+
       const name = document.getElementById("orderName").value.trim();
       const phone = document.getElementById("orderPhone").value.trim();
       const address = document.getElementById("orderAddress").value.trim();
-      const map = document.getElementById("orderMap").value.trim() || "غير مدخل";
+      const map = document.getElementById("orderMapLink").value.trim() || "غير مدخل";
+
+      if (!name) return alert("يرجى كتابة الاسم الكامل");
+      if (!validateSaudiPhone(phone)) return alert("يرجى كتابة رقم جوال صحيح (05xxxxxxxx)");
+      if (!address) return alert("يرجى كتابة العنوان");
 
       let total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
       let itemsNames = cart.map(i => `- ${i.name} (العدد: ${i.qty}) بسعر: ${i.price * i.qty} ر.س`).join("\n");
@@ -593,7 +601,6 @@ n>
 
       let whatsappUrl = `https://wa.me/${ownerPhone}?text=${encodeURIComponent(message)}`;
       
-      alert("تم التحقق بنجاح! جاري إرسال الطلب إلى الواتساب الخاص بالمتجر.");
       window.open(whatsappUrl, '_blank');
 
       cart = [];
