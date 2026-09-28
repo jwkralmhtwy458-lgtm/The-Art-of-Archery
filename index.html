@@ -571,25 +571,22 @@
       alert("تم تسجيل الدخول بنجاح!");
     }
 
-    function sendOrderToWhatsApp() {
+ function sendOrderToWhatsApp() {
       if (cart.length === 0) return alert("السلة فارغة!");
 
       const name = document.getElementById("orderName").value.trim();
       const phone = document.getElementById("orderPhone").value.trim();
-      const address = document.getElementById("orderAddress").value.trim();
-      const map = document.getElementById("orderMapLink").value.trim() || "غير مدخل";
+      const map = document.getElementById("orderMapLink").value.trim();
 
-      if (!name) return alert("يرجى كتابة الاسم الكامل");
-      if (!validateSaudiPhone(phone)) return alert("يرجى كتابة رقم جوال صحيح (05xxxxxxxx)");
-      if (!address) return alert("يرجى كتابة العنوان");
-
+  if (!name) return alert("يرجى كتابة الاسم الكامل");
+if (!validateSaudiPhone(phone)) return alert("يرجى كتابة رقم جوال صحيح (05xxxxxxxx)");
+if (!map || map.trim() === "") return alert("يرجى وضع رابط الموقع من Google Maps");
       let total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
       let itemsNames = cart.map(i => `- ${i.name} (العدد: ${i.qty}) بسعر: ${i.price * i.qty} ر.س`).join("\n");
 
       let message = `*طلب جديد من متجر فن الرماية* 🎯\n\n` +
                     `👤 *اسم العميل:* ${name}\n` +
                     `📱 *رقم الجوال:* ${phone}\n` +
-                    `📍 *العنوان:* ${address}\n` +
                     `🗺️ *رابط الموقع:* ${map}\n\n` +
                     `🛒 *المنتجات المطلوبة:*\n${itemsNames}\n\n` +
                     `💰 *الإجمالي النهائي:* ${total} ر.س`;
@@ -601,7 +598,6 @@
       cart = [];
       renderCart();
     }
-
     listenToCloudProducts();
   </script>
 </body>
