@@ -130,8 +130,13 @@
   <input type="text" id="orderPhone" maxlength="10" placeholder="رقم الجوال (05xxxxxxxx)" oninput="checkPhoneInput(this, 'checkoutPhoneErr')">
   <div id="checkoutPhoneErr" class="error-msg" style="color:red;">رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05</div>
 
-  <!-- حقول العنوان داخل البطاقة -->
-  <input type="text" id="orderAddress" placeholder="المدينة / الحي / شارع" style="margin-top: 10px;">
+
+<!-- حقول العنوان داخل البطاقة -->
+        <input type="text" id="orderMapLink" placeholder="رابط الموقع من Google Maps" style="margin-top: 10px;">
+        <p style="margin-top: 8px; font-size: 11px; color: #555;">* سيتم تأكيد الطلب فور إرساله عبر الواتساب.</p>
+      </div>
+
+      <button class="btn-confirm" onclick="sendOrderToWhatsApp()">إرسال الطلب عبر الواتساب 📲</button>>
 <p style="margin-top: 8px; font-size: 11px; color: #555;">* سيتم تأكيد الطلب فور إرساله عبر الواتساب.</p>
         </div>
 
